@@ -1,0 +1,614 @@
+-- File: RingHud/scripts/mods/RingHud/features/grenades_feature.lua
+local mod = get_mod("RingHud"); if not mod then return {} end
+
+-- Guard against double-loading (prevents rehook warnings if io_dofile is called twice)
+if mod.grenades_feature then
+    return mod.grenades_feature
+end
+
+mod.grenades_feature              = {}
+local GrenadesFeature             = mod.grenades_feature
+
+local Notch                       = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local U                           = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Broker flash-grenade (blitz) settings – used for kill-based charge regen progress
+-- Prefer TalentSettings.broker.blitz.flash_grenade.num_kills (matches broker buff template),
+-- fall back to broker_passive_blitz_charge_on_kill.num_kills if needed.
+-- ─────────────────────────────────────────────────────────────────────────────
+local TalentSettings              = require("scripts/settings/talent/talent_settings")
+local BrokerTalentSettings        = TalentSettings and TalentSettings.broker
+local BROKER_BLITZ_KILLS_REQUIRED = 0
+
+do
+    local broker_blitz_cfg      = BrokerTalentSettings and BrokerTalentSettings.blitz and
+        BrokerTalentSettings.blitz.flash_grenade
+    local passive_cfg           = BrokerTalentSettings and BrokerTalentSettings.broker_passive_blitz_charge_on_kill
+
+    BROKER_BLITZ_KILLS_REQUIRED =
+        (broker_blitz_cfg and broker_blitz_cfg.num_kills)
+        or (passive_cfg and passive_cfg.num_kills)
+        or 0
+end
+
+-- Option D: mirror template_data.tracked_kills into mod state (best-effort)
+mod._broker_blitz_tracked_kills    = mod._broker_blitz_tracked_kills or 0
+mod._broker_blitz_prev_grenade_cur = mod._broker_blitz_prev_grenade_cur or 0
+mod._broker_blitz_template_patched = mod._broker_blitz_template_patched or false
+
+do
+    if not mod._broker_blitz_template_patched and mod.hook_require then
+        mod._broker_blitz_template_patched = true
+
+        mod:hook_require("scripts/settings/buff/archetype_buff_templates/broker_buff_templates", function(templates)
+            local tpl = templates and templates.broker_passive_blitz_charge_on_kill
+            if type(tpl) ~= "table" then
+                return
+            end
+
+            if tpl._ringhud_broker_blitz_patched then
+                return
+            end
+            tpl._ringhud_broker_blitz_patched = true
+
+            local BuffSettings                = require("scripts/settings/buff/buff_settings")
+            local proc_events                 = BuffSettings and BuffSettings.proc_events
+
+            local function _mirror_if_local_player(template_data, template_context)
+                if type(template_data) ~= "table" then
+                    return
+                end
+                local kills = template_data.tracked_kills
+                if type(kills) ~= "number" then
+                    return
+                end
+
+                local player      = Managers.player:local_player_safe(1)
+                local player_unit = player and player.player_unit
+                local unit        = template_context and template_context.unit
+
+                if player_unit and unit == player_unit then
+                    mod._broker_blitz_tracked_kills = math.max(kills, 0)
+                end
+            end
+
+            -- start_func: initialize mirror when buff is applied clientside
+            if type(tpl.start_func) == "function" then
+                local orig_start = tpl.start_func
+                tpl.start_func = function(template_data, template_context, ...)
+                    orig_start(template_data, template_context, ...)
+                    _mirror_if_local_player(template_data, template_context)
+                end
+            end
+
+            -- specific_proc_func: mirror after tracked_kills increments/resets
+            local sp = tpl.specific_proc_func
+            if proc_events and type(sp) == "table" then
+                local function _wrap_proc(key)
+                    local fn = sp[key]
+                    if type(fn) ~= "function" then
+                        return
+                    end
+
+                    sp[key] = function(params, template_data, template_context, t, ...)
+                        local ret = fn(params, template_data, template_context, t, ...)
+                        _mirror_if_local_player(template_data, template_context)
+                        return ret
+                    end
+                end
+
+                _wrap_proc(proc_events.on_kill)
+                _wrap_proc(proc_events.on_minion_death)
+            end
+
+            -- visual_stack_count: extra mirror point (harmless, helps if UI calls it clientside)
+            if type(tpl.visual_stack_count) == "function" then
+                local orig_vsc = tpl.visual_stack_count
+                tpl.visual_stack_count = function(template_data, template_context, ...)
+                    local ret = orig_vsc(template_data, template_context, ...)
+                    _mirror_if_local_player(template_data, template_context)
+                    return ret
+                end
+            end
+        end)
+    end
+end
+
+local SETTINGS              = mod._settings
+local GRENADE_OUTLINE_COLOR = mod.PALETTE_RGBA1.dodge_color_full_rgba
+local COL_DAMAGE            = mod.PALETTE_RGBA1.default_damage_color_rgba
+
+local GRENADE_ARC_MIN       = -0.25
+local GRENADE_ARC_MAX       = 0.25
+local GRENADE_SEGMENT_GAP   = 0.025
+local MAX                   = mod.MAX_GRENADE_SEGMENTS_DISPLAY or 14
+
+local _style_keys_seg       = {}
+local _style_keys_edge      = {}
+for i = 1, MAX do
+    _style_keys_seg[i] = "grenade_segment_" .. i
+    _style_keys_edge[i] = "grenade_segment_edge_" .. i
+end
+
+local _cached_arcs = {}
+
+local function _get_arcs_for_count(num_segments)
+    if num_segments <= 0 then return nil end
+
+    if _cached_arcs[num_segments] then
+        return _cached_arcs[num_segments]
+    end
+
+    local arcs           = {}
+    local total_arc      = GRENADE_ARC_MAX - GRENADE_ARC_MIN
+    local num_gaps       = math.max(0, num_segments - 1)
+    local gap_space      = num_gaps * GRENADE_SEGMENT_GAP
+    local visual_space   = math.max(0, total_arc - gap_space)
+    local seg_arc        = (visual_space / num_segments)
+    local current_bottom = GRENADE_ARC_MIN
+
+    for i = 1, num_segments do
+        local top = math.min(GRENADE_ARC_MAX, current_bottom + seg_arc)
+        if i == num_segments then top = GRENADE_ARC_MAX end
+        arcs[i] = { top, current_bottom }
+        current_bottom = top + GRENADE_SEGMENT_GAP
+    end
+
+    _cached_arcs[num_segments] = arcs
+    return arcs
+end
+
+local function _fast_hide_all(widget, style)
+    local changed = false
+    for i = 1, MAX do
+        local seg = style[_style_keys_seg[i]]
+        local edg = style[_style_keys_edge[i]]
+        if seg then
+            if seg.visible then
+                seg.visible = false; changed = true
+            end
+            if seg.material_values and seg.material_values.amount ~= 0 then
+                seg.material_values.amount = 0; changed = true
+            end
+        end
+        if edg then
+            if edg.visible then
+                edg.visible = false; changed = true
+            end
+            if edg.material_values and edg.material_values.amount ~= 0 then
+                edg.material_values.amount = 0; changed = true
+            end
+        end
+    end
+    if changed then widget.dirty = true end
+end
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Widget factory
+-- ─────────────────────────────────────────────────────────────────────────────
+function GrenadesFeature.add_widgets(widget_defs, _, layout, palettes)
+    if not widget_defs then return end
+    local UIWidget          = require("scripts/managers/ui/ui_widget")
+
+    local size              = (layout and layout.size) or { 240, 240 }
+    local inner_size_factor = (layout and layout.inner_size_factor) or 0.8
+    local ARGB              = (palettes and palettes.ARGB) or (mod.PALETTE_ARGB255 or {})
+    local RGBA1             = (palettes and palettes.RGBA1) or (mod.PALETTE_RGBA1 or {})
+
+    local passes            = {}
+    for i = 1, MAX do
+        -- Base segment
+        passes[#passes + 1] = {
+            pass_type = "rotated_texture",
+            value     = "content/ui/materials/effects/forcesword_bar",
+            style_id  = _style_keys_seg[i],
+            style     = {
+                uvs                  = { { 0, 0 }, { 1, 1 } },
+                horizontal_alignment = "center",
+                vertical_alignment   = "center",
+                offset               = { 0, 0, 1 },
+                size                 = { size[1] * inner_size_factor, size[2] * inner_size_factor },
+                color                = ARGB.GENERIC_WHITE,
+                visible              = false,
+                pivot                = { 0, 0 },
+                angle                = 0,
+                material_values      = {
+                    amount               = 0,
+                    glow_on_off          = 0,
+                    lightning_opacity    = 0,
+                    arc_top_bottom       = { 0, 0 },
+                    fill_outline_opacity = { 1.3, 1.3 },
+                    outline_color        = table.clone(RGBA1.default_damage_color_rgba),
+                },
+            },
+        }
+        -- Edge sliver (partial notch)
+        passes[#passes + 1] = {
+            pass_type = "rotated_texture",
+            value     = "content/ui/materials/effects/forcesword_bar",
+            style_id  = _style_keys_edge[i],
+            style     = {
+                uvs                  = { { 0, 0 }, { 1, 1 } },
+                horizontal_alignment = "center",
+                vertical_alignment   = "center",
+                offset               = { 0, 0, 2 },
+                size                 = { size[1] * inner_size_factor, size[2] * inner_size_factor },
+                color                = ARGB.GENERIC_WHITE,
+                visible              = false,
+                pivot                = { 0, 0 },
+                angle                = 0,
+                material_values      = {
+                    amount               = 0,
+                    glow_on_off          = 0,
+                    lightning_opacity    = 0,
+                    arc_top_bottom       = { 0, 0 },
+                    fill_outline_opacity = { 1.3, 1.3 },
+                    outline_color        = table.clone(RGBA1.default_damage_color_rgba),
+                },
+            },
+        }
+    end
+
+    widget_defs.grenade_bar = UIWidget.create_definition(passes, "grenade_bar")
+end
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- Renderer
+-- ─────────────────────────────────────────────────────────────────────────────
+function GrenadesFeature.update(hud_element, widget, hud_state, hotkey_override)
+    if not widget or not widget.style then return end
+
+    local grenade_bar_dropdown = SETTINGS.grenade_bar_dropdown
+    local style                = widget.style
+    local data                 = hud_state.grenade_data or {}
+
+    local current              = data.current or data.current_charges or 0
+    local live_max             = data.live_max or data.max or data.max_charges or 0
+
+    local charge_based         = (live_max or 0) > 0
+    if not charge_based or grenade_bar_dropdown == "grenade_disabled" then
+        _fast_hide_all(widget, style)
+        return
+    end
+
+    local overall_visible_normally = false
+    local is_compact = false
+    local is_hide_empty = false
+
+    if grenade_bar_dropdown == "grenade_hide_empty_compact" or grenade_bar_dropdown == "grenade_hide_empty" then
+        is_hide_empty = true
+        is_compact = (grenade_bar_dropdown == "grenade_hide_empty_compact")
+        if current > 0 then
+            overall_visible_normally = true
+        elseif current == 0 and data.is_regenerating and (data.regen_progress or 0) > 0.001 then
+            overall_visible_normally = true
+        end
+    else
+        is_compact = (grenade_bar_dropdown == "grenade_hide_full_compact")
+        if current < live_max then
+            overall_visible_normally = true
+        elseif current >= live_max then
+            if data.is_regenerating and (data.regen_progress or 0) > 0.001 and (data.regen_progress or 1) < 0.999 then
+                overall_visible_normally = true
+            end
+        end
+    end
+
+    local should_render_bar = hotkey_override or overall_visible_normally
+
+    if not should_render_bar then
+        _fast_hide_all(widget, style)
+        return
+    end
+
+    local changed      = false
+    local num_seg_calc = math.min(live_max, MAX)
+    local arcs         = _get_arcs_for_count(num_seg_calc)
+    local fallback_arc = { 0, 0 }
+
+    for i = 1, MAX do
+        local seg_style  = style[_style_keys_seg[i]]
+        local edge_style = style[_style_keys_edge[i]]
+
+        if seg_style and seg_style.material_values then
+            local seg_mv = seg_style.material_values
+
+            -- Defaults: hidden, empty, default color
+            local vis_final = false
+            local amt_final = 0
+            local clr_final = COL_DAMAGE
+            local arc_final = fallback_arc
+
+            if i <= num_seg_calc then
+                if hotkey_override then
+                    vis_final = true
+                    if i <= current then
+                        amt_final = 1
+                        clr_final = GRENADE_OUTLINE_COLOR
+                    elseif i == current + 1 and data.is_regenerating then
+                        amt_final = data.regen_progress or 0
+                    end
+                elseif overall_visible_normally then
+                    -- Standard visibility logic
+                    if i <= current then
+                        -- Full segments
+                        if not is_compact or not is_hide_empty then
+                            vis_final = true
+                            amt_final = 1
+                            clr_final = GRENADE_OUTLINE_COLOR
+                        elseif is_compact and i == current then
+                            -- Compact logic: show current filled only?
+                            -- Logic from original:
+                            -- if compact then if i == current+1 then show regen
+                            -- if i <= current then vis=true
+                            vis_final = true
+                            amt_final = 1
+                            clr_final = GRENADE_OUTLINE_COLOR
+                        end
+                    elseif i == current + 1 then
+                        -- Next segment (potentially regenerating)
+                        if is_compact then
+                            vis_final = true -- Compact shows the next empty/regen slot
+                        else
+                            vis_final = true -- Standard shows all empty slots
+                        end
+
+                        if data.is_regenerating and (data.regen_progress or 0) > 0.001 then
+                            amt_final = data.regen_progress
+                        end
+                    else
+                        -- Future empty segments
+                        if not is_compact then
+                            vis_final = true
+                        end
+                    end
+                end
+
+                if vis_final and arcs and arcs[i] then
+                    arc_final = arcs[i]
+                end
+            end
+
+            local arc_top, arc_bottom = arc_final[1], arc_final[2]
+            local want_partial = vis_final and (amt_final > 0 and amt_final < 1)
+
+            if want_partial and edge_style and edge_style.material_values then
+                local res = Notch.notch_split(arc_top, arc_bottom, amt_final)
+
+                -- base
+                changed = U.mv_set_arc(seg_mv, res.base.top, res.base.bottom, changed)
+                if seg_mv.amount ~= 1 then
+                    seg_mv.amount = 1; changed = true
+                end
+                changed = U.mv_set_outline(seg_mv, clr_final, changed)
+
+                -- edge
+                local emv = edge_style.material_values
+                changed = U.mv_set_arc(emv, res.edge.top, res.edge.bottom, changed)
+                if emv.amount ~= 0 then
+                    emv.amount = 0; changed = true
+                end
+                changed = U.mv_set_outline(emv, clr_final, changed)
+
+                local base_vis = res.base.show
+                local edge_vis = res.edge.show
+                if seg_style.visible ~= base_vis then
+                    seg_style.visible = base_vis; changed = true
+                end
+                if edge_style.visible ~= edge_vis then
+                    edge_style.visible = edge_vis; changed = true
+                end
+            else
+                if seg_style.visible ~= vis_final then
+                    seg_style.visible = vis_final; changed = true
+                end
+                if vis_final then
+                    if seg_mv.amount ~= amt_final then
+                        seg_mv.amount = amt_final; changed = true
+                    end
+                    changed = U.mv_set_outline(seg_mv, clr_final, changed)
+                    changed = U.mv_set_arc(seg_mv, arc_top, arc_bottom, changed)
+                else
+                    if seg_mv.amount ~= 0 then
+                        seg_mv.amount = 0; changed = true
+                    end
+                    changed = U.mv_set_arc(seg_mv, 0, 0, changed)
+                end
+
+                if edge_style and edge_style.visible then
+                    edge_style.visible = false; changed = true
+                    if edge_style.material_values and edge_style.material_values.amount ~= 0 then
+                        edge_style.material_values.amount = 0
+                    end
+                end
+            end
+        end
+    end
+
+    if changed then widget.dirty = true end
+end
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- State helper (used by RingHud_state_player.lua)
+-- Populates/updates grenade_data in-place:
+--   current, current_charges, max, max_charges, live_max,
+--   is_regenerating, max_cooldown, regen_progress, replenish_buff_name
+-- ─────────────────────────────────────────────────────────────────────────────
+function mod.grenades_update_state(unit_data_comp, ability_ext, player_unit, grenade_data)
+    if not grenade_data then return end
+
+    local ability_key  = "grenade_ability"
+    local base_max     = 0
+    local observed_cur = 0
+
+    if ability_ext and ability_ext.ability_is_equipped and ability_ext:ability_is_equipped(ability_key) then
+        local remaining              = ability_ext:remaining_ability_charges(ability_key) or 0
+        local max_c                  = ability_ext:max_ability_charges(ability_key) or 0
+        observed_cur                 = math.max(observed_cur, remaining)
+        base_max                     = math.max(base_max, max_c)
+
+        grenade_data.current         = remaining
+        grenade_data.current_charges = remaining
+        grenade_data.max             = max_c
+        grenade_data.max_charges     = max_c
+    end
+
+    local grenade_comp = unit_data_comp and unit_data_comp:read_component("grenade_ability")
+    if grenade_comp then
+        local comp_cur = grenade_comp.num_charges or 0
+        observed_cur   = math.max(observed_cur, comp_cur)
+
+        if (grenade_data.current or 0) < comp_cur then
+            grenade_data.current         = comp_cur
+            grenade_data.current_charges = comp_cur
+        end
+        if (grenade_data.max or 0) == 0 then
+            grenade_data.max         = base_max
+            grenade_data.max_charges = base_max
+        end
+    end
+
+    -- Latch max within mission
+    local latched   = mod._grenade_max_override or 0
+    local candidate = math.max(base_max, observed_cur)
+    if candidate > latched then
+        mod._grenade_max_override = candidate
+        latched = candidate
+    end
+    grenade_data.live_max            = math.max(base_max, latched, observed_cur)
+
+    -- Regen progress (cooldown or buff-driven)
+    grenade_data.is_regenerating     = false
+    grenade_data.replenish_buff_name = nil
+    grenade_data.max_cooldown        = 0
+    grenade_data.regen_progress      = 0
+
+    local cur                        = grenade_data.current or 0
+    local live_max_val               = grenade_data.live_max or 0
+    local used_any                   = false
+
+    -- Keep the broker mirror from going stale across any charge change / full state
+    do
+        local prev = mod._broker_blitz_prev_grenade_cur
+        if prev == nil then
+            prev = cur
+        end
+
+        if cur ~= prev then
+            mod._broker_blitz_tracked_kills = 0
+            mod._broker_blitz_prev_grenade_cur = cur
+        end
+
+        if cur >= live_max_val then
+            mod._broker_blitz_tracked_kills = 0
+        end
+    end
+
+    -- Cooldown-based regeneration (e.g. Ogryn box, some talents)
+    if ability_ext and ability_ext.ability_is_equipped and ability_ext:ability_is_equipped(ability_key) then
+        local rem_cd = ability_ext:remaining_ability_cooldown(ability_key) or 0
+        local max_cd = ability_ext:max_ability_cooldown(ability_key) or 0
+        local paused = ability_ext.is_cooldown_paused and ability_ext:is_cooldown_paused(ability_key)
+
+        if max_cd > 0 and rem_cd > 0 and cur < live_max_val and not paused then
+            grenade_data.is_regenerating = true
+            grenade_data.max_cooldown    = max_cd
+            grenade_data.regen_progress  = math.clamp(1 - (rem_cd / max_cd), 0, 1)
+            used_any                     = true
+        end
+    end
+
+    local function _buff_template_name(buff)
+        if not buff then return nil end
+
+        if buff.template and type(buff.template) == "function" then
+            local tmpl = buff:template()
+            local name = tmpl and tmpl.name
+            if name then
+                return name
+            end
+        end
+
+        if buff.template_name and type(buff.template_name) == "function" then
+            return buff:template_name()
+        end
+
+        -- Fallbacks (string fields)
+        return buff._template_name or buff.template_name
+    end
+
+    -- Buff-based regeneration (Veteran/Zealot/Ogryn/Psyker) + Broker blitz-on-kill
+    if (not used_any) and player_unit then
+        local buff_ext = ScriptUnit.has_extension(player_unit, "buff_system") and
+            ScriptUnit.extension(player_unit, "buff_system")
+        local buffs    = buff_ext and buff_ext._buffs_by_index
+        if buffs and cur < live_max_val then
+            local names = {
+                veteran_grenade_replenishment      = true,
+                adamant_grenade_replenishment      = true,
+                adamant_whistle_replenishment      = true,
+                ogryn_friend_grenade_replenishment = true,
+                psyker_knife_replenishment         = true,
+            }
+
+            local broker_kill_buff = nil
+
+            for _, b in pairs(buffs) do
+                local name = _buff_template_name(b)
+
+                if name and names[name] then
+                    local dur  = (b.duration and type(b.duration) == "function") and b:duration() or nil
+                    local prog = (b.duration_progress and type(b.duration_progress) == "function") and
+                        b:duration_progress() or nil
+                    if prog and prog > 0 then
+                        local fill                       = (name == "veteran_grenade_replenishment" or name == "adamant_grenade_replenishment")
+                            and math.clamp(prog, 0, 1)    -- 0→1 elapsed
+                            or math.clamp(1 - prog, 0, 1) -- 1→0 remaining
+
+                        grenade_data.is_regenerating     = true
+                        grenade_data.replenish_buff_name = name
+                        if dur and dur > 0 then grenade_data.max_cooldown = dur end
+                        grenade_data.regen_progress = fill
+                        break
+                    end
+                elseif name == "broker_passive_blitz_charge_on_kill" then
+                    broker_kill_buff = b
+                end
+            end
+
+            -- Broker kill-based blitz charge: show kills-to-next-charge as a partial segment.
+            -- Option A: read from buff object if present.
+            -- Option D: if the buff isn't discoverable here (or returns 0), fall back to mirrored tracked_kills.
+            if (not grenade_data.is_regenerating) and BROKER_BLITZ_KILLS_REQUIRED > 0 then
+                local kills = 0
+
+                if broker_kill_buff then
+                    if broker_kill_buff.visual_stack_count and type(broker_kill_buff.visual_stack_count) == "function" then
+                        kills = broker_kill_buff:visual_stack_count() or 0
+                    elseif broker_kill_buff.stack_count and type(broker_kill_buff.stack_count) == "function" then
+                        kills = broker_kill_buff:stack_count() or 0
+                    end
+                end
+
+                if (kills or 0) <= 0 then
+                    kills = mod._broker_blitz_tracked_kills or 0
+                end
+
+                kills = math.max(kills or 0, 0)
+
+                if kills > 0 then
+                    local prog = math.clamp(kills / BROKER_BLITZ_KILLS_REQUIRED, 0, 1)
+                    if prog > 0 then
+                        grenade_data.is_regenerating     = true
+                        grenade_data.replenish_buff_name = "broker_passive_blitz_charge_on_kill"
+                        grenade_data.regen_progress      = prog
+                        -- max_cooldown remains 0 here: this is kill-based, not time-based.
+                    end
+                end
+            end
+        end
+    end
+end
+
+return GrenadesFeature
