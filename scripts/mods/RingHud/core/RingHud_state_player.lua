@@ -330,7 +330,7 @@ function RingHudState.get_hud_data_state(ring_hud_instance)
 
     hud_state.unit_data = hud_state.player_extensions.unit_data
     local unit_data_comp_access_point
-    local weapon_ext, buff_ext, health_ext, toughness_ext, ability_ext, inv_comp
+    local weapon_ext, buff_ext, health_ext, toughness_ext, ability_ext, inv_comp, visual_loadout_ext
     if hud_state.unit_data then
         unit_data_comp_access_point = hud_state.unit_data
         weapon_ext                  = hud_state.player_extensions.weapon
@@ -339,6 +339,8 @@ function RingHudState.get_hud_data_state(ring_hud_instance)
         toughness_ext               = hud_state.player_extensions.toughness
         ability_ext                 = hud_state.player_extensions.ability
         inv_comp                    = unit_data_comp_access_point:read_component("inventory")
+        visual_loadout_ext          = ScriptUnit.has_extension(player_unit, "visual_loadout_system")
+            and ScriptUnit.extension(player_unit, "visual_loadout_system")
     else
         hud_state.is_music_high_intensity        = Intensity.high_intensity_active()
         hud_state.is_high_intensity_timer_active = Intensity.is_timer_active()
@@ -637,7 +639,7 @@ function RingHudState.get_hud_data_state(ring_hud_instance)
         local ammo_data = hud_state.ammo_data
         -- Use cached archetype
         if mod.ammo_clip_update_state then
-            mod.ammo_clip_update_state(unit_data_comp_access_point, weapon_ext, inv_comp, ammo_data, archetype_name)
+            mod.ammo_clip_update_state(unit_data_comp_access_point, weapon_ext, inv_comp, ammo_data, archetype_name, visual_loadout_ext)
         end
 
         if mod.ammo_reserve_update_state then

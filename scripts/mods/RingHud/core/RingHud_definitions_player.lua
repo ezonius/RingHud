@@ -51,6 +51,14 @@ local vertical_offset = u * 39.6
 local text_offset = u * 52.8
 local outer_size_factor = 1.5
 local inner_size_factor = 0.8
+
+-- New material constants for Patch 1.3+ compatibility
+local BAR_THICKNESS = 0.045
+local BAR_RADIUS = 0.6
+local BAR_OUTLINE = 0.011
+local SIZE_THICKNESS_OUTLINE = { BAR_RADIUS, BAR_THICKNESS, BAR_OUTLINE }
+local BAR_OFFSET = { 12 * u, 36 * u, 0 }
+
 local outer_size = { size[1] * outer_size_factor, size[2] * outer_size_factor }
 local inner_size = { size[1] * inner_size_factor, size[2] * inner_size_factor }
 
@@ -58,6 +66,13 @@ local user_text_offset_bias = _effective_text_offset() * u
 local settings_x = (mod._settings and mod._settings.player_hud_offset_x) or 0
 local settings_y = (mod._settings and mod._settings.player_hud_offset_y) or 0
 local base_font_size = _effective_text_size(18 * u)
+local ammo_clip_offset_x = (mod._settings and mod._settings.ammo_clip_offset_x or 0) * u
+local ammo_clip_offset_y = (mod._settings and mod._settings.ammo_clip_offset_y or 0) * u
+local ammo_clip_scale = mod._settings and mod._settings.ammo_clip_scale or 1.0
+
+local ammo_clip_counter_offset_x = (mod._settings and mod._settings.ammo_clip_counter_offset_x or 0) * u
+local ammo_clip_counter_offset_y = (mod._settings and mod._settings.ammo_clip_counter_offset_y or 0) * u
+local ammo_clip_counter_scale = mod._settings and mod._settings.ammo_clip_counter_scale or 1.0
 
 local function create_text_style(offset, align, color, font, font_size, custom_size)
     local style                     = table_clone(UIFontSettings.body_small)
@@ -123,13 +138,14 @@ local Definitions = {
             { (offset_correction * outer_size_factor) - (u * 1), offset_correction, 5 }, outer_size),
 
         grenade_bar                    = create_node(
-            { (offset_correction * inner_size_factor) - (u * 1), -(offset_correction * inner_size_factor), 7 },
+            { (offset_correction * inner_size_factor) - (u * 4), -(offset_correction * inner_size_factor), 7 },
             inner_size),
         ammo_clip_bar                  = create_node(
-            { -(offset_correction * inner_size_factor) + (u * 1), -(offset_correction * inner_size_factor) + (u * 2), 8 },
-            inner_size),
+            { -(offset_correction * inner_size_factor) + (u * 4) + ammo_clip_offset_x,
+                -(offset_correction * inner_size_factor) + (u * 2) - ammo_clip_offset_y, 8 },
+            { inner_size[1] * ammo_clip_scale, inner_size[2] * ammo_clip_scale }),
         talent_bar                     = create_node(
-            { (offset_correction * inner_size_factor) - (u * 1), -(offset_correction * inner_size_factor) + (u * 2), 8 },
+            { (offset_correction * inner_size_factor) - (u * 4), -(offset_correction * inner_size_factor) + (u * 2), 8 },
             inner_size),
 
         peril_text_display_node        = create_node(
@@ -138,8 +154,9 @@ local Definitions = {
             { -(offset_correction + text_offset + u * 96), u * 14.2, 9 }, { u * 200, u * 30 }, "right",
             "top"),
         ammo_clip_text_display_node    = create_node(
-            { -(offset_correction + text_offset + u * 115), -(offset_correction * 2.5) - (u * 8), 10 },
-            { u * 150, u * 30 },
+            { -(offset_correction + text_offset + u * 115) + ammo_clip_counter_offset_x,
+                -(offset_correction * 2.5) - (u * 8) - ammo_clip_counter_offset_y, 10 },
+            { u * 150 * ammo_clip_counter_scale, u * 30 * ammo_clip_counter_scale },
             "right"),
 
         stimm_indicator                = create_node(
@@ -189,13 +206,29 @@ local feature_bindings = {
     { name = "charge_feature" },
     { name = "dodge_feature" },
     { name = "peril_feature" },
-    { name = "toughness_hp_feature", args = { size = size, outer_size_factor = outer_size_factor } },
-    { name = "ammo_clip_feature",    args = { size = size, inner_size_factor = inner_size_factor } },
+    {
+        name = "toughness_hp_feature",
+        args = {
+            size = size,
+            outer_size_factor = outer_size_factor,
+            bar_offset = BAR_OFFSET,
+            size_thickness_outline = SIZE_THICKNESS_OUTLINE
+        }
+    },
+    {
+        name = "ammo_clip_feature",
+        args = {
+            size = { size[1] * ammo_clip_scale, size[2] * ammo_clip_scale },
+            inner_size_factor = inner_size_factor,
+            bar_offset = { BAR_OFFSET[1] * ammo_clip_scale, BAR_OFFSET[2] * ammo_clip_scale, 0 },
+            size_thickness_outline = SIZE_THICKNESS_OUTLINE
+        }
+    },
     { name = "grenades_feature",     args = { size = size, inner_size_factor = inner_size_factor } },
 }
 
 local colors = { ARGB = ARGB, RGBA1 = RGBA1 }
-local default_args = { size = size }
+local default_args = { size = size, bar_offset = BAR_OFFSET, size_thickness_outline = SIZE_THICKNESS_OUTLINE }
 
 for i = 1, #feature_bindings do
     local binding = feature_bindings[i]
@@ -211,9 +244,17 @@ if TalentFeature and TalentFeature.add_widgets then
     TalentFeature.add_widgets(
         Definitions.widget_definitions,
         nil,
-        { size = size, inner_size_factor = inner_size_factor, scenegraph_id = "talent_bar" },
+        {
+            size = size,
+            inner_size_factor = inner_size_factor,
+            scenegraph_id = "talent_bar",
+            bar_offset = BAR_OFFSET,
+            size_thickness_outline = SIZE_THICKNESS_OUTLINE
+        },
         colors
     )
 end
 
+Definitions.BAR_OFFSET = BAR_OFFSET
+Definitions.SIZE_THICKNESS_OUTLINE = SIZE_THICKNESS_OUTLINE
 return Definitions

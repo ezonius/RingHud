@@ -141,6 +141,10 @@ function W.build_marker_definitions(scale, scenegraph_id)
         end
     end
 
+    local SIZE_THICKNESS_OUTLINE = { 0.6, 0.045, 0.011 }
+    local OFFSET_X = 12 * (C.TILE_SIZE / 240)
+    local OFFSET_Y = -36 * (C.TILE_SIZE / 240) -- Negated for vertical flip uvs
+
     -- Health segments (base)
     for i = 1, C.MAX_HP_SEGMENTS do
         local cid = string.format("hp_seg_%d_visible", i)
@@ -156,7 +160,7 @@ function W.build_marker_definitions(scale, scenegraph_id)
                 uvs                  = { { 0, 1 }, { 1, 0 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { C.TILE_SIZE / 16, -C.TILE_SIZE / 5.7, 1 },
+                offset               = { OFFSET_X, OFFSET_Y, 1 },
                 size                 = { C.ARC_SIZE, C.ARC_SIZE },
                 pivot                = { C.ARC_SIZE / 2, C.ARC_SIZE },
                 angle                = 0,
@@ -165,11 +169,12 @@ function W.build_marker_definitions(scale, scenegraph_id)
                 material_values      = {
                     amount               = 0,
                     arc_top_bottom       = U.seg_arc_range(math.min(i, C.MAX_WOUNDS_CAP), C.MAX_WOUNDS_CAP),
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color        = _rgba_or_white(mod.PALETTE_RGBA1 and
                         mod.PALETTE_RGBA1.default_toughness_color_rgba),
                     lightning_opacity    = 0,
                     glow_on_off          = 0,
+                    SizeThicknessOutline = SIZE_THICKNESS_OUTLINE,
                 },
             }
         })
@@ -190,7 +195,7 @@ function W.build_marker_definitions(scale, scenegraph_id)
                 uvs                  = { { 0, 1 }, { 1, 0 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { C.TILE_SIZE / 16, -C.TILE_SIZE / 5.7, 2 },
+                offset               = { OFFSET_X, OFFSET_Y, 2 },
                 size                 = { C.ARC_SIZE, C.ARC_SIZE },
                 pivot                = { C.ARC_SIZE / 2, C.ARC_SIZE },
                 angle                = 0,
@@ -199,11 +204,12 @@ function W.build_marker_definitions(scale, scenegraph_id)
                 material_values      = {
                     amount               = 1,
                     arc_top_bottom       = U.seg_arc_range(i, C.MAX_WOUNDS_CAP),
-                    fill_outline_opacity = { 0.7, 1.3 },
+                    fill_outline_opacity = { 0.7, 1 },
                     outline_color        = _rgba_or_white(mod.PALETTE_RGBA1 and
                         mod.PALETTE_RGBA1.default_corruption_color_rgba),
                     lightning_opacity    = 0,
                     glow_on_off          = 0,
+                    SizeThicknessOutline = SIZE_THICKNESS_OUTLINE,
                 },
             }
         })
@@ -440,7 +446,7 @@ function W.build_marker_definitions(scale, scenegraph_id)
             uvs                  = { { 0, 1 }, { 1, 0 } },
             horizontal_alignment = "center",
             vertical_alignment   = "center",
-            offset               = { C.TILE_SIZE / 16, -C.TILE_SIZE / 5.7, 13 },
+            offset               = { OFFSET_X, OFFSET_Y, 13 },
             size                 = { C.ARC_SIZE, C.ARC_SIZE },
             pivot                = { C.ARC_SIZE / 2, C.ARC_SIZE },
             angle                = 0,
@@ -448,11 +454,12 @@ function W.build_marker_definitions(scale, scenegraph_id)
             material_values      = {
                 amount               = 1,
                 arc_top_bottom       = U.seg_arc_range(1, 1),
-                fill_outline_opacity = { 1.3, 1.3 },
+                fill_outline_opacity = { 1.3, 1 },
                 outline_color        = _rgba_or_white(mod.PALETTE_RGBA1 and
                     mod.PALETTE_RGBA1.dodge_color_negative_rgba),
                 lightning_opacity    = 0,
                 glow_on_off          = 0,
+                SizeThicknessOutline = SIZE_THICKNESS_OUTLINE,
             },
         }
     })
@@ -471,7 +478,7 @@ function W.build_marker_definitions(scale, scenegraph_id)
             uvs                  = { { 0, 1 }, { 1, 0 } },
             horizontal_alignment = "center",
             vertical_alignment   = "center",
-            offset               = { C.TILE_SIZE / 16, -C.TILE_SIZE / 5.7, 14 },
+            offset               = { OFFSET_X, OFFSET_Y, 14 },
             size                 = { C.ARC_SIZE, C.ARC_SIZE },
             pivot                = { C.ARC_SIZE / 2, C.ARC_SIZE },
             angle                = 0,
@@ -479,11 +486,12 @@ function W.build_marker_definitions(scale, scenegraph_id)
             material_values      = {
                 amount               = 0,
                 arc_top_bottom       = U.seg_arc_range(1, 1),
-                fill_outline_opacity = { 1.3, 1.3 },
+                fill_outline_opacity = { 1.3, 1 },
                 outline_color        = _rgba_or_white(mod.PALETTE_RGBA1 and
                     mod.PALETTE_RGBA1.dodge_color_negative_rgba),
                 lightning_opacity    = 0,
                 glow_on_off          = 0,
+                SizeThicknessOutline = SIZE_THICKNESS_OUTLINE,
             },
         }
     })

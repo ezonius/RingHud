@@ -318,6 +318,12 @@ local localizations = {
         ["zh-tw"] = "僅限能量條 (瞄準)",
     },
     ammo_clip_disabled               = { en = Localize("loc_setting_checkbox_off") },
+    ammo_clip_offset_x               = { en = "Clip Offset X" },
+    ammo_clip_offset_y               = { en = "Clip Offset Y" },
+    ammo_clip_scale                  = { en = "Clip Scale" },
+    ammo_clip_counter_offset_x       = { en = "Counter Offset X" },
+    ammo_clip_counter_offset_y       = { en = "Counter Offset Y" },
+    ammo_clip_counter_scale          = { en = "Counter Scale" },
 
     ammo_reserve_dropdown            = { en = Localize("loc_weapon_stats_display_reserve_ammo") },
     ammo_reserve_dropdown_tooltip    = {

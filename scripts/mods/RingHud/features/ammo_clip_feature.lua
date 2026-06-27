@@ -90,7 +90,8 @@ local function _has_any_latched_clip_data(hud_element)
 end
 
 -- STATE (clip) ---------------------------------------------------------------
-function AmmoClipFeature.update_state(unit_data_comp_access_point, weapon_ext, inv_comp, ammo_data_out, archetype_name)
+function AmmoClipFeature.update_state(unit_data_comp_access_point, weapon_ext, inv_comp, ammo_data_out, archetype_name,
+                                      visual_loadout_extension)
     if not ammo_data_out then
         return
     end
@@ -103,21 +104,21 @@ function AmmoClipFeature.update_state(unit_data_comp_access_point, weapon_ext, i
     local is_needle_pistol          = false
     local special_active            = false
 
-    -- We only expose clip info when the wielded slot is the secondary AND the template uses ammo.
-    if wielded_slot == "slot_secondary"
-        and unit_data_comp_access_point
-        and weapon_ext
-    then
-        local wielded_template = weapon_ext:weapon_template()
-        local hud_conf         = wielded_template and wielded_template.hud_configuration
-        local uses_flag        = hud_conf and hud_conf.uses_ammunition
+    local secondary_template
+    if visual_loadout_extension then
+        secondary_template = visual_loadout_extension:weapon_template_from_slot("slot_secondary")
+    end
+
+    if secondary_template then
+        local hud_conf  = secondary_template.hud_configuration
+        local uses_flag = hud_conf and hud_conf.uses_ammunition
 
         if uses_flag then
             uses_ammo = true
 
             -- Broker Needle Pistol Logic
-            if archetype_name == "broker" and wielded_template.name then
-                if string.find(wielded_template.name, "needlepistol") then
+            if archetype_name == "broker" and secondary_template.name then
+                if string.find(secondary_template.name, "needlepistol") then
                     is_needle_pistol = true
                 end
             end
@@ -488,6 +489,8 @@ function AmmoClipFeature.add_widgets(widget_defs, _, layout, palettes)
     local size     = (layout and layout.size) or
         { 240 * (mod._settings.ring_scale or 1), 240 * (mod._settings.ring_scale or 1) }
     local inner    = (layout and layout.inner_size_factor) or 0.8
+    local bar_offset = (layout and layout.bar_offset) or { 0, 0, 0 }
+    local size_thickness_outline = (layout and layout.size_thickness_outline) or { 0.6, 0.045, 0.011 }
 
     local ARGB     = (palettes and palettes.ARGB) or (mod.PALETTE_ARGB255 or {})
     local RGBA1    = (palettes and palettes.RGBA1) or (mod.PALETTE_RGBA1 or {})
@@ -499,7 +502,7 @@ function AmmoClipFeature.add_widgets(widget_defs, _, layout, palettes)
             uvs = { { 1, 0 }, { 0, 1 } },
             horizontal_alignment = "center",
             vertical_alignment = "center",
-            offset = { 0, 0, z },
+            offset = { -bar_offset[1] * inner, bar_offset[2] * inner, z },
             size = sz,
             color = ARGB.GENERIC_WHITE,
             visible = false,
@@ -526,6 +529,7 @@ function AmmoClipFeature.add_widgets(widget_defs, _, layout, palettes)
                 arc_top_bottom = { mod.AMMO_CLIP_ARC_MAX, mod.AMMO_CLIP_ARC_MIN },
                 fill_outline_opacity = { 0.7, 0.5 },
                 outline_color = { 0.3, 0.3, 0.3, 0.8 }, -- AMMO_CLIP_UNFILLED_COLOR
+                SizeThicknessOutline = size_thickness_outline,
             }
             return s
         end)(),
@@ -543,8 +547,9 @@ function AmmoClipFeature.add_widgets(widget_defs, _, layout, palettes)
                 glow_on_off = 0,
                 lightning_opacity = 0,
                 arc_top_bottom = { mod.AMMO_CLIP_ARC_MIN, mod.AMMO_CLIP_ARC_MIN },
-                fill_outline_opacity = { 1.3, 1.3 },
+                fill_outline_opacity = { 1.3, 1 },
                 outline_color = table.clone(RGBA1.AMMO_BAR_COLOR_HIGH),
+                SizeThicknessOutline = size_thickness_outline,
             }
             return s
         end)(),
@@ -563,8 +568,9 @@ function AmmoClipFeature.add_widgets(widget_defs, _, layout, palettes)
                     glow_on_off = 0,
                     lightning_opacity = 0,
                     arc_top_bottom = { 0, 0 }, -- set at runtime
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color = table.clone(RGBA1.AMMO_BAR_COLOR_HIGH),
+                    SizeThicknessOutline = size_thickness_outline,
                 }
                 return s
             end)(),

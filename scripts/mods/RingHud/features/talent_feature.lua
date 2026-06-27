@@ -63,7 +63,7 @@ local ADAMANT_ARCS = _compute_segment_arcs(ADAMANT_TALENT_SEGMENTS)
 
 -- Pre-calculate Opacity Tables
 local OPACITY_DIM  = { 0.7, 0.5 }
-local OPACITY_FULL = { 1.3, 1.3 }
+local OPACITY_FULL = { 1.3, 1 }
 
 local function _fast_hide_all(widget, style)
     local changed = false
@@ -492,6 +492,8 @@ end
 function TalentFeature.add_widgets(widget_defs, _, layout, palettes)
     local size             = (layout and layout.size) or { 240, 240 }
     local inner            = (layout and layout.inner_size_factor) or 0.8
+    local bar_offset       = (layout and layout.bar_offset) or { 0, 0, 0 }
+    local size_thickness_outline = (layout and layout.size_thickness_outline) or { 0.6, 0.045, 0.011 }
     local parent_id        = (layout and layout.scenegraph_id) or "talent_bar"
     local ARGB             = (palettes and palettes.ARGB) or (mod.PALETTE_ARGB255 or {})
     local RGBA1            = (palettes and palettes.RGBA1) or (mod.PALETTE_RGBA1 or {})
@@ -517,7 +519,7 @@ function TalentFeature.add_widgets(widget_defs, _, layout, palettes)
                 uvs                  = { { 0, 0 }, { 1, 1 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { 0, 0, 1 },
+                offset               = { bar_offset[1] * inner, bar_offset[2] * inner, 1 },
                 size                 = inner_size,
                 color                = ARGB.GENERIC_WHITE,
                 visible              = false,
@@ -528,8 +530,9 @@ function TalentFeature.add_widgets(widget_defs, _, layout, palettes)
                     glow_on_off          = 0,
                     lightning_opacity    = 0,
                     arc_top_bottom       = { TALENT_ARC_MAX, TALENT_ARC_MIN },
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color        = zealot_outline,
+                    SizeThicknessOutline = size_thickness_outline,
                 },
             },
         },
@@ -542,7 +545,7 @@ function TalentFeature.add_widgets(widget_defs, _, layout, palettes)
                 uvs                  = { { 0, 0 }, { 1, 1 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { 0, 0, 2 },
+                offset               = { bar_offset[1] * inner, bar_offset[2] * inner, 2 },
                 size                 = inner_size,
                 color                = ARGB.GENERIC_WHITE,
                 visible              = false,
@@ -553,8 +556,9 @@ function TalentFeature.add_widgets(widget_defs, _, layout, palettes)
                     glow_on_off          = 0,
                     lightning_opacity    = 0,
                     arc_top_bottom       = { TALENT_ARC_MAX, TALENT_ARC_MIN },
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color        = table.clone(zealot_outline),
+                    SizeThicknessOutline = size_thickness_outline,
                 },
             },
         },
@@ -570,7 +574,7 @@ function TalentFeature.add_widgets(widget_defs, _, layout, palettes)
                 uvs                  = { { 0, 0 }, { 1, 1 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { 0, 0, 1 },
+                offset               = { bar_offset[1] * inner, bar_offset[2] * inner, 1 },
                 size                 = inner_size,
                 color                = ARGB.GENERIC_WHITE,
                 visible              = false,
@@ -581,8 +585,9 @@ function TalentFeature.add_widgets(widget_defs, _, layout, palettes)
                     glow_on_off          = 0,
                     lightning_opacity    = 0,
                     arc_top_bottom       = { TALENT_ARC_MIN, TALENT_ARC_MIN },
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color        = table.clone(psyker_outline),
+                    SizeThicknessOutline = size_thickness_outline,
                 },
             },
         }
@@ -602,7 +607,7 @@ function TalentFeature.add_widgets(widget_defs, _, layout, palettes)
                 uvs                       = { { 0, 0 }, { 1, 1 } },
                 horizontal_alignment      = "center",
                 vertical_alignment        = "center",
-                offset                    = { 0, 0, 1 },
+                offset                    = { bar_offset[1] * inner, bar_offset[2] * inner, 1 },
                 size                      = inner_size,
                 color                     = ARGB.GENERIC_WHITE,
                 visible                   = false,
@@ -616,6 +621,7 @@ function TalentFeature.add_widgets(widget_defs, _, layout, palettes)
                     arc_top_bottom       = { TALENT_ARC_MIN, TALENT_ARC_MIN },
                     fill_outline_opacity = { 0.7, 0.5 },
                     outline_color        = table.clone(outline),
+                    SizeThicknessOutline = size_thickness_outline,
                 },
             },
         }
@@ -629,7 +635,7 @@ function TalentFeature.add_widgets(widget_defs, _, layout, palettes)
                 uvs                       = { { 0, 0 }, { 1, 1 } },
                 horizontal_alignment      = "center",
                 vertical_alignment        = "center",
-                offset                    = { 0, 0, 2 },
+                offset                    = { bar_offset[1] * inner, bar_offset[2] * inner, 2 },
                 size                      = inner_size,
                 color                     = ARGB.GENERIC_WHITE,
                 visible                   = false,
@@ -643,6 +649,7 @@ function TalentFeature.add_widgets(widget_defs, _, layout, palettes)
                     arc_top_bottom       = { TALENT_ARC_MIN, TALENT_ARC_MIN },
                     fill_outline_opacity = { 0.7, 0.5 },
                     outline_color        = table.clone(outline),
+                    SizeThicknessOutline = size_thickness_outline,
                 },
             },
         }

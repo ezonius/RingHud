@@ -35,6 +35,12 @@ mod._settings = {
 
     -- Munitions
     ammo_clip_dropdown             = mod:get("ammo_clip_dropdown"),
+    ammo_clip_offset_x             = mod:get("ammo_clip_offset_x"),
+    ammo_clip_offset_y             = mod:get("ammo_clip_offset_y"),
+    ammo_clip_scale                = mod:get("ammo_clip_scale"),
+    ammo_clip_counter_offset_x     = mod:get("ammo_clip_counter_offset_x"),
+    ammo_clip_counter_offset_y     = mod:get("ammo_clip_counter_offset_y"),
+    ammo_clip_counter_scale        = mod:get("ammo_clip_counter_scale"),
     ammo_reserve_dropdown          = mod:get("ammo_reserve_dropdown"),
     grenade_bar_dropdown           = mod:get("grenade_bar_dropdown"),
 
@@ -85,7 +91,13 @@ function mod.on_setting_changed(setting_id)
         or setting_id == "player_hud_offset_x" or setting_id == "player_hud_offset_y"
         or setting_id == "player_hud_font"
         or setting_id == "player_hud_text_size"
-        or setting_id == "player_hud_text_offset" then
+        or setting_id == "player_hud_text_offset"
+        or setting_id == "ammo_clip_offset_x"
+        or setting_id == "ammo_clip_offset_y"
+        or setting_id == "ammo_clip_scale"
+        or setting_id == "ammo_clip_counter_offset_x"
+        or setting_id == "ammo_clip_counter_offset_y"
+        or setting_id == "ammo_clip_counter_scale" then
         mod._ringhud_needs_rebuild = true
     end
 

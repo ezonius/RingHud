@@ -241,6 +241,8 @@ end
 -- ─────────────────────────────────────────────────────────────────────────────
 function PerilFeature.add_widgets(dst, styles, metrics, colors)
     local size  = (metrics and metrics.size) or { 240, 240 }
+    local bar_offset = (metrics and metrics.bar_offset) or { 0, 0, 0 }
+    local size_thickness_outline = (metrics and metrics.size_thickness_outline) or { 0.6, 0.045, 0.011 }
     local ARGB  = (colors and colors.ARGB) or (mod.PALETTE_ARGB255 or {})
     local RGBA1 = (colors and colors.RGBA1) or (mod.PALETTE_RGBA1 or {})
     setmetatable(ARGB, { __index = function() return { 255, 255, 255, 255 } end })
@@ -256,7 +258,7 @@ function PerilFeature.add_widgets(dst, styles, metrics, colors)
                 uvs                  = { { 1, 0 }, { 0, 1 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { 0, 0, 1 },
+                offset               = { -bar_offset[1], bar_offset[2], 1 },
                 size                 = size,
                 color                = ARGB.GENERIC_WHITE,
                 visible              = false,
@@ -267,8 +269,9 @@ function PerilFeature.add_widgets(dst, styles, metrics, colors)
                     glow_on_off = 0,
                     lightning_opacity = 0,
                     arc_top_bottom = { PERIL_ARC_TOP, PERIL_ARC_BOTTOM },
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color = { 1, 1, 1, 1 },
+                    SizeThicknessOutline = size_thickness_outline,
                 },
             },
         },
@@ -281,7 +284,7 @@ function PerilFeature.add_widgets(dst, styles, metrics, colors)
                 uvs                  = { { 1, 0 }, { 0, 1 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { 0, 0, 1 },
+                offset               = { -bar_offset[1], bar_offset[2], 1 },
                 size                 = size,
                 color                = ARGB.GENERIC_WHITE,
                 visible              = false,
@@ -292,8 +295,9 @@ function PerilFeature.add_widgets(dst, styles, metrics, colors)
                     glow_on_off = 0,
                     lightning_opacity = 0,
                     arc_top_bottom = { PERIL_ARC_TOP, PERIL_ARC_BOTTOM },
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color = { 1, 1, 1, 1 },
+                    SizeThicknessOutline = size_thickness_outline,
                 },
             },
         },
@@ -306,7 +310,7 @@ function PerilFeature.add_widgets(dst, styles, metrics, colors)
                 uvs                  = { { 1, 0 }, { 0, 1 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { 0, 0, 1 },
+                offset               = { -bar_offset[1], bar_offset[2], 1 },
                 size                 = size,
                 color                = ARGB.GENERIC_WHITE,
                 visible              = false,
@@ -317,8 +321,9 @@ function PerilFeature.add_widgets(dst, styles, metrics, colors)
                     glow_on_off = 0,
                     lightning_opacity = 0,
                     arc_top_bottom = { PERIL_ARC_TOP, PERIL_ARC_BOTTOM }, -- placeholder
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color = { 1, 1, 1, 1 },
+                    SizeThicknessOutline = size_thickness_outline,
                 },
             },
         },

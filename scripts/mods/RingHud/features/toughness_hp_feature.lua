@@ -375,6 +375,9 @@ function ToughnessHpFeature.add_widgets(dst, _, params, palettes)
 
     local size              = params.size or { 240, 240 }
     local outer_size_factor = params.outer_size_factor or 1.5
+    local bar_offset        = params.bar_offset or { 0, 0, 0 }
+    local size_thickness_outline = params.size_thickness_outline or { 0.6, 0.045, 0.011 }
+
     local outer_size        = { size[1] * outer_size_factor, size[2] * outer_size_factor }
 
     local ARGB              = (palettes.ARGB or mod.PALETTE_ARGB255) or {}
@@ -391,7 +394,7 @@ function ToughnessHpFeature.add_widgets(dst, _, params, palettes)
                 uvs                  = { { 0, 0 }, { 1, 1 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { 0, 0, z or 1 },
+                offset               = { bar_offset[1], bar_offset[2], z or 1 },
                 size                 = outer_size,
                 color                = white,
                 visible              = false,
@@ -402,8 +405,9 @@ function ToughnessHpFeature.add_widgets(dst, _, params, palettes)
                     glow_on_off          = 0,
                     lightning_opacity    = 0,
                     arc_top_bottom       = arc_tb,
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color        = table.clone(outline_rgba),
+                    SizeThicknessOutline = size_thickness_outline,
                 },
             },
         }

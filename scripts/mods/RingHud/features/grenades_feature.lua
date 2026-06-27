@@ -193,6 +193,8 @@ function GrenadesFeature.add_widgets(widget_defs, _, layout, palettes)
 
     local size              = (layout and layout.size) or { 240, 240 }
     local inner_size_factor = (layout and layout.inner_size_factor) or 0.8
+    local bar_offset        = (layout and layout.bar_offset) or { 0, 0, 0 }
+    local size_thickness_outline = (layout and layout.size_thickness_outline) or { 0.6, 0.045, 0.011 }
     local ARGB              = (palettes and palettes.ARGB) or (mod.PALETTE_ARGB255 or {})
     local RGBA1             = (palettes and palettes.RGBA1) or (mod.PALETTE_RGBA1 or {})
 
@@ -207,7 +209,7 @@ function GrenadesFeature.add_widgets(widget_defs, _, layout, palettes)
                 uvs                  = { { 0, 0 }, { 1, 1 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { 0, 0, 1 },
+                offset               = { bar_offset[1] * inner_size_factor, bar_offset[2] * inner_size_factor, 1 },
                 size                 = { size[1] * inner_size_factor, size[2] * inner_size_factor },
                 color                = ARGB.GENERIC_WHITE,
                 visible              = false,
@@ -218,8 +220,9 @@ function GrenadesFeature.add_widgets(widget_defs, _, layout, palettes)
                     glow_on_off          = 0,
                     lightning_opacity    = 0,
                     arc_top_bottom       = { 0, 0 },
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color        = table.clone(RGBA1.default_damage_color_rgba),
+                    SizeThicknessOutline = size_thickness_outline,
                 },
             },
         }
@@ -232,7 +235,7 @@ function GrenadesFeature.add_widgets(widget_defs, _, layout, palettes)
                 uvs                  = { { 0, 0 }, { 1, 1 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { 0, 0, 2 },
+                offset               = { bar_offset[1] * inner_size_factor, bar_offset[2] * inner_size_factor, 2 },
                 size                 = { size[1] * inner_size_factor, size[2] * inner_size_factor },
                 color                = ARGB.GENERIC_WHITE,
                 visible              = false,
@@ -243,8 +246,9 @@ function GrenadesFeature.add_widgets(widget_defs, _, layout, palettes)
                     glow_on_off          = 0,
                     lightning_opacity    = 0,
                     arc_top_bottom       = { 0, 0 },
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color        = table.clone(RGBA1.default_damage_color_rgba),
+                    SizeThicknessOutline = size_thickness_outline,
                 },
             },
         }

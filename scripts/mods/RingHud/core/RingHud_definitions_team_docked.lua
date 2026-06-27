@@ -49,6 +49,10 @@ local function make_tile_only_widget_def(node_name)
     local passes  = {}
     local style   = {}
 
+    local SIZE_THICKNESS_OUTLINE = { 0.6, 0.045, 0.011 }
+    local OFFSET_X = 12 * (C.TILE_SIZE / 240)
+    local OFFSET_Y = 36 * (C.TILE_SIZE / 240)
+
     -- Health segments (base layer)
     -- NOTE: Now builds up to C.MAX_HP_SEGMENTS (one extra pass reserved for the split/“notch”).
     for i = 1, C.MAX_HP_SEGMENTS do
@@ -65,7 +69,7 @@ local function make_tile_only_widget_def(node_name)
                 uvs                  = { { 0, 0 }, { 1, 1 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { C.TILE_SIZE / 16, C.TILE_SIZE / 8, 1 },
+                offset               = { OFFSET_X, OFFSET_Y, 1 },
                 size                 = { C.ARC_SIZE, C.ARC_SIZE },
                 pivot                = { C.ARC_SIZE / 2, C.ARC_SIZE },
                 angle                = 0,
@@ -74,10 +78,11 @@ local function make_tile_only_widget_def(node_name)
                     amount               = 0,
                     -- Safe default for the extra (+1) pass: clamp index so seg_arc_range never goes OOB.
                     arc_top_bottom       = U.seg_arc_range(math.min(i, C.MAX_WOUNDS_CAP), C.MAX_WOUNDS_CAP),
-                    fill_outline_opacity = { 1.3, 1.3 },
+                    fill_outline_opacity = { 1.3, 1 },
                     outline_color        = { 1, 1, 1, 1 },
                     lightning_opacity    = 0,
                     glow_on_off          = 0,
+                    SizeThicknessOutline = SIZE_THICKNESS_OUTLINE,
                 },
             }
         })
@@ -99,7 +104,7 @@ local function make_tile_only_widget_def(node_name)
                 uvs                  = { { 0, 0 }, { 1, 1 } },
                 horizontal_alignment = "center",
                 vertical_alignment   = "center",
-                offset               = { C.TILE_SIZE / 16, C.TILE_SIZE / 8, 2 },
+                offset               = { OFFSET_X, OFFSET_Y, 2 },
                 size                 = { C.ARC_SIZE, C.ARC_SIZE },
                 pivot                = { C.ARC_SIZE / 2, C.ARC_SIZE },
                 angle                = 0,
@@ -107,10 +112,11 @@ local function make_tile_only_widget_def(node_name)
                 material_values      = {
                     amount               = 1,
                     arc_top_bottom       = U.seg_arc_range(i, C.MAX_WOUNDS_CAP),
-                    fill_outline_opacity = { 0.7, 1.3 },
+                    fill_outline_opacity = { 0.7, 1 },
                     outline_color        = { 0.8, 0.27, 0.8, 1.0 },
                     lightning_opacity    = 0,
                     glow_on_off          = 0,
+                    SizeThicknessOutline = SIZE_THICKNESS_OUTLINE,
                 },
             }
         })
@@ -131,7 +137,7 @@ local function make_tile_only_widget_def(node_name)
             uvs                  = { { 0, 0 }, { 1, 1 } },
             horizontal_alignment = "center",
             vertical_alignment   = "center",
-            offset               = { C.TILE_SIZE / 16, C.TILE_SIZE / 8, 2 }, -- same z as corruption overlay
+            offset               = { OFFSET_X, OFFSET_Y, 2 }, -- same z as corruption overlay
             size                 = { C.ARC_SIZE, C.ARC_SIZE },
             pivot                = { C.ARC_SIZE / 2, C.ARC_SIZE },
             angle                = 0,
@@ -139,10 +145,11 @@ local function make_tile_only_widget_def(node_name)
             material_values      = {
                 amount               = 1,                     -- filled slice
                 arc_top_bottom       = U.seg_arc_range(1, 1), -- runtime will narrow this to [bottom, edge-half_gap]
-                fill_outline_opacity = { 1.3, 1.3 },
+                fill_outline_opacity = { 1.3, 1 },
                 outline_color        = { 1, 0.2, 0.2, 1.0 },  -- overwritten at runtime as needed
                 lightning_opacity    = 0,
                 glow_on_off          = 0,
+                SizeThicknessOutline = SIZE_THICKNESS_OUTLINE,
             },
         }
     })
@@ -161,7 +168,7 @@ local function make_tile_only_widget_def(node_name)
             uvs                  = { { 0, 0 }, { 1, 1 } },
             horizontal_alignment = "center",
             vertical_alignment   = "center",
-            offset               = { C.TILE_SIZE / 16, C.TILE_SIZE / 8, 3 }, -- above base
+            offset               = { OFFSET_X, OFFSET_Y, 3 }, -- above base
             size                 = { C.ARC_SIZE, C.ARC_SIZE },
             pivot                = { C.ARC_SIZE / 2, C.ARC_SIZE },
             angle                = 0,
@@ -169,10 +176,11 @@ local function make_tile_only_widget_def(node_name)
             material_values      = {
                 amount               = 0,                     -- empty slice
                 arc_top_bottom       = U.seg_arc_range(1, 1), -- runtime will narrow this to [edge+half_gap, top]
-                fill_outline_opacity = { 1.3, 1.3 },
+                fill_outline_opacity = { 1.3, 1 },
                 outline_color        = { 1, 0.2, 0.2, 1.0 },  -- overwritten at runtime as needed
                 lightning_opacity    = 0,
                 glow_on_off          = 0,
+                SizeThicknessOutline = SIZE_THICKNESS_OUTLINE,
             },
         }
     })
