@@ -383,7 +383,8 @@ function ChargeFeature.update(widget, hud_state, hotkey_override)
 
     local is_other         = (charge_system_type == "block_passive"
         or charge_system_type == "action_module"
-        or charge_system_type == "ogryn_powermaul")
+        or charge_system_type == "ogryn_powermaul"
+        or charge_system_type == "cooldown_charges")
 
     local show_other       = SETTINGS.charge_other_enabled
         and is_other
@@ -402,8 +403,8 @@ function ChargeFeature.update(widget, hud_state, hotkey_override)
         end
     end
 
-    local dual_mode_enabled   = SETTINGS.charge_kills_enabled
-        and dual_is_shivs
+    local dual_mode_enabled   = ((SETTINGS.charge_kills_enabled and dual_is_shivs)
+        or (SETTINGS.charge_other_enabled and charge_system_type == "cooldown_charges"))
         and (hud_state.charge_max_charges or 0) > 0
 
     local thrust_mode_enabled = SETTINGS.charge_other_enabled

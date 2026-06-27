@@ -507,9 +507,11 @@ function RingHudState.get_hud_data_state(ring_hud_instance)
                     hud_state.charge_system_type = "kill_count"
                 elseif special_tweak.passive_charge_add_interval then
                     hud_state.charge_system_type = "block_passive"
+                elseif current_wep_template.weapon_special_class == "WeaponSpecialCooldownCharges" then
+                    hud_state.charge_system_type = "cooldown_charges"
                 end
 
-                if (hud_state.charge_system_type == "kill_count" or hud_state.charge_system_type == "block_passive")
+                if (hud_state.charge_system_type == "kill_count" or hud_state.charge_system_type == "block_passive" or hud_state.charge_system_type == "cooldown_charges")
                     and max_charges > 0
                 then
                     hud_state.charge_fraction = current_charges / max_charges
