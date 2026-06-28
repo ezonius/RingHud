@@ -113,7 +113,7 @@ function mod.dodge_calculate_diminishing_return(dodge_comp, move_comp, slide_com
     return consecutive_dodges, dr_start, dr_limit_base, diminishing_return
 end
 
-function DodgeFeature.update(widget, hud_state, hotkey_override)
+function DodgeFeature.update(widget, hud_state, hotkey_override, t)
     if not widget or not widget.style then return end
 
     local style = widget.style
@@ -123,8 +123,15 @@ function DodgeFeature.update(widget, hud_state, hotkey_override)
     local num_disp = data.efficient_dodges_display or 0
     local threshold = SETTINGS.dodge_viz_threshold
 
+    local is_empty = not data.has_infinite and (data.remaining_efficient or 0) <= 0
+    local flash_active = false
+    if SETTINGS.dodge_flash_enabled and is_empty then
+        local ui_t = t or (Managers and Managers.time and Managers.time:time("ui")) or 0
+        flash_active = math.sin(ui_t * 20) > 0
+    end
+
     -- Settings: 0 = always visible, -1 = always hidden, positive = threshold gating
-    if threshold == -1 and not hotkey_override then
+    if threshold == -1 and not hotkey_override and not flash_active then
         _fast_hide_all(widget, style)
         return
     end
@@ -142,7 +149,8 @@ function DodgeFeature.update(widget, hud_state, hotkey_override)
     elseif (data.remaining_efficient or 0) > 0 then
         outline_color = COL_POS
     else
-        outline_color = COL_NEG
+        local col_name = SETTINGS.dodge_color_empty
+        outline_color = (col_name and mod.PALETTE_RGBA1[col_name]) or COL_NEG
     end
 
     local current_max = math.clamp(num_disp, 0, MAX_DODGE_SEGMENTS)
@@ -163,19 +171,29 @@ function DodgeFeature.update(widget, hud_state, hotkey_override)
                         and (data.has_infinite or (data.remaining_efficient or 0) < num_disp))
             end
 
-            local seg_visible = (hotkey_override or normally_visible) and within_max
+            local seg_visible = (hotkey_override or normally_visible or flash_active) and within_max
 
             if seg_visible then
                 local arc = (arcs and arcs[i]) or fallback_arc
                 changed = U.mv_set_arc(mat, arc[1], arc[2], changed)
 
                 local seg_amount = (data.has_infinite or (data.remaining_efficient or 0) >= i) and 1 or 0
+                local current_outline_color = outline_color
+                local current_fill_color    = mod.PALETTE_RGBA1.GENERIC_WHITE
+
+                if flash_active then
+                    seg_amount = 1
+                    local flash_col_name = SETTINGS.dodge_flash_color
+                    current_fill_color = (flash_col_name and mod.PALETTE_RGBA1[flash_col_name]) or mod.PALETTE_RGBA1.POWER_RED
+                end
+
                 if mat.amount ~= seg_amount then
                     mat.amount = seg_amount
                     changed = true
                 end
 
-                changed = U.mv_set_outline(mat, outline_color, changed)
+                changed = U.mv_set_outline(mat, current_outline_color, changed)
+                changed = U.mv_set_fill(mat, current_fill_color, changed)
             end
 
             changed = U.set_style_visible(seg_style, seg_visible, changed)
@@ -220,6 +238,7 @@ function DodgeFeature.add_widgets(dst, styles, metrics, colors)
                     arc_top_bottom = { 0.51, 0.51 },
                     fill_outline_opacity = { 1.3, 1 },
                     outline_color = table.clone(RGBA1.dodge_color_positive_rgba),
+                    fillcolor = { 1, 1, 1, 1 },
                     SizeThicknessOutline = size_thickness_outline,
                 },
             },

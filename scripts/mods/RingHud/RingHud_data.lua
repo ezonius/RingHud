@@ -258,6 +258,23 @@ local DATA = {
                                 range         = { -1, 8 },
                                 tooltip       = "dodge_viz_tooltip",
                             },
+                            {
+                                setting_id    = "dodge_color_empty",
+                                type          = "dropdown",
+                                default_value = "POWER_RED",
+                                options       = _palette_options(),
+                            },
+                            {
+                                setting_id    = "dodge_flash_enabled",
+                                type          = "checkbox",
+                                default_value = false,
+                            },
+                            {
+                                setting_id    = "dodge_flash_color",
+                                type          = "dropdown",
+                                default_value = "POWER_RED",
+                                options       = _palette_options(),
+                            },
                         }
                     },
 

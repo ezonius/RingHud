@@ -80,6 +80,11 @@ mod._settings = {
     hide_default_player            = mod:get("hide_default_player"),
 
     minimal_objective_feed_enabled = mod:get("minimal_objective_feed_enabled"),
+
+    -- Dodge
+    dodge_color_empty              = mod:get("dodge_color_empty"),
+    dodge_flash_enabled            = mod:get("dodge_flash_enabled"),
+    dodge_flash_color              = mod:get("dodge_flash_color"),
 }
 
 -- Centralized settings change handler (the only one in the mod)

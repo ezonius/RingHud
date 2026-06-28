@@ -662,6 +662,18 @@ function RingHudUtils.mv_set_outline(mv, rgba, changed)
     return changed or false
 end
 
+-- mv.fillcolor = RGBA1 (only write when changed). Returns true if changed.
+function RingHudUtils.mv_set_fill(mv, rgba, changed)
+    if not mv then return changed or false end
+    local next_rgba = RingHudUtils.rgba_or_white(rgba)
+    local curr = mv.fillcolor
+    if not curr or not RingHudUtils.colors_equal(curr, next_rgba) then
+        mv.fillcolor = table.clone(next_rgba)
+        return true
+    end
+    return changed or false
+end
+
 -- mv.arc_top_bottom = {top, bottom}. Returns true if changed.
 function RingHudUtils.mv_set_arc(mv, top, bottom, changed)
     if not mv then return changed or false end

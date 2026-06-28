@@ -260,7 +260,7 @@ HudElementRingHud_player.update        = function(self, dt, t, ui_renderer, rend
 
     -- Feature Updates
     if PerilFeature.update then PerilFeature.update(self, widgets, hud_state, hotkey_active_override) end
-    if DodgeFeature.update then DodgeFeature.update(widgets.dodge_bar, hud_state, hotkey_active_override) end
+    if DodgeFeature.update then DodgeFeature.update(widgets.dodge_bar, hud_state, hotkey_active_override, t) end
     if StaminaFeature.update then StaminaFeature.update(self, widgets.stamina_bar, hud_state, hotkey_active_override) end
     if ToughnessHpFeature.update then ToughnessHpFeature.update(self, widgets, hud_state, hotkey_active_override) end
     if ToughnessHpFeature.update_health_text then

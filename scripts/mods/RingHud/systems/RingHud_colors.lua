@@ -60,6 +60,7 @@ mod.PALETTE_RGBA1    = {
     POWER_RED            = { 0.75, 0.00, 0.00, 1.00 },
     SPEED_BLUE           = { 0.00, 0.00, 0.30, 1.00 },
     COOLDOWN_YELLOW      = { 1.00, 0.20, 0.00, 1.00 },
+    PUNKY_PINK           = { 0.82, 0.27, 1.00, 1.00 },
     AMMO_ORANGE          = { 1.00, 0.51, 0.00, 1.00 },
     TOME_BLUE            = { 0.31, 0.43, 0.63, 1.00 },
     GRIMOIRE_PURPLE      = { 0.40, 0.15, 0.38, 1.00 },
@@ -96,6 +97,12 @@ mod.PALETTE_RGBA1    = {
     -- AMMO_BAR_COLOR_LOW            = { 1.00, 0.20, 0.20, 1.00 },
     AMMO_BAR_COLOR_LOW            = { 1.00, 0.15, 0.15, 1.00 },
     AMMO_BAR_COLOR_CRITICAL       = { 1.00, 0.00, 0.00, 1.00 },
+
+    AMMO_TEXT_COLOR_HIGH          = { 0.51, 0.58, 0.46, 1.00 },
+    AMMO_TEXT_COLOR_MEDIUM_H      = { 1.00, 1.00, 0.45, 1.00 },
+    AMMO_TEXT_COLOR_MEDIUM_L      = { 1.00, 0.45, 0.15, 1.00 },
+    AMMO_TEXT_COLOR_LOW           = { 1.00, 0.15, 0.15, 1.00 },
+    AMMO_TEXT_COLOR_CRITICAL      = { 1.00, 0.00, 0.00, 1.00 },
 
     peril_color_spectrum          = { -- 7 steps
         -- { 0.54, 0.79, 0.15, 1.00 }, -- green

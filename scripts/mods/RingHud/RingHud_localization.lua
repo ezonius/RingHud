@@ -212,6 +212,21 @@ local localizations = {
         ["zh-tw"] =
         "閃避剩餘次數在設定值以下時顯示\n 設置0始終顯示，設置-1始終隱藏\n如果需要更加靈活的閃避條自定義，可以使用《Show Remaining Dodges》，果需要顯示閃避次數dnrvs的《Numeric UI》",
     },
+    dodge_color_empty                = {
+        en = "Empty Color",
+        ["zh-cn"] = "耗尽颜色",
+        ["zh-tw"] = "耗盡顏色",
+    },
+    dodge_flash_enabled              = {
+        en = "Flash when Empty",
+        ["zh-cn"] = "耗尽时闪烁",
+        ["zh-tw"] = "耗盡時閃爍",
+    },
+    dodge_flash_color                = {
+        en = "Flash Color",
+        ["zh-cn"] = "闪烁颜色",
+        ["zh-tw"] = "閃爍顏色",
+    },
 
     casting_supergroup               = {
         en = "CASTING", -- TextUtils.localize_to_upper -- [ ] Localize
