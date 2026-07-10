@@ -565,6 +565,23 @@ function mod.grenades_update_state(unit_data_comp, ability_ext, player_unit, gre
                     local dur  = (b.duration and type(b.duration) == "function") and b:duration() or nil
                     local prog = (b.duration_progress and type(b.duration_progress) == "function") and
                         b:duration_progress() or nil
+
+                    if name == "veteran_grenade_replenishment" then
+                        -- Veteran talent: Demolition Stockpile.
+                        -- Uses specific cooldowns per grenade type: Krak (90s), Frag (60s), Smoke (60s).
+                        -- The buff's duration_progress() returns 0->1 based on internal timer.
+                        if not dur or dur == 0 then
+                            local ability_name = ability_ext and ability_ext:get_current_grenade_ability_name()
+                            if ability_name == "veteran_krak_grenade" then
+                                dur = 90
+                            elseif ability_name == "veteran_frag_grenade" or ability_name == "veteran_smoke_grenade" then
+                                dur = 60
+                            else
+                                dur = 60 -- Fallback to most common
+                            end
+                        end
+                    end
+
                     if prog and prog > 0 then
                         local fill                       = (name == "veteran_grenade_replenishment" or name == "adamant_grenade_replenishment")
                             and math.clamp(prog, 0, 1)    -- 0→1 elapsed
