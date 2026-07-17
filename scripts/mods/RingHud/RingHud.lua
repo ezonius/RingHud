@@ -5,6 +5,18 @@ local mod = get_mod("RingHud")
 if not mod then return end
 mod.version                             = "RingHud version 1.17.0"
 
+---@return any? result Cached result of io_dofile
+function mod:cached_io_dofile(file_path)
+    _G.RingHud_io_dofile_cache = _G.RingHud_io_dofile_cache or {}
+    local cached = _G.RingHud_io_dofile_cache[file_path]
+    if cached ~= nil then
+        return cached
+    end
+    local result = self:io_dofile(file_path)
+    _G.RingHud_io_dofile_cache[file_path] = result
+    return result
+end
+
 local MISSION_BOARD_PACKAGE             = "packages/ui/views/mission_board_view/mission_board_view"
 
 mod._mission_board_package_load_id      = mod._mission_board_package_load_id or nil
@@ -62,38 +74,38 @@ function mod.get_local_archetype()
     return nil
 end
 
-mod:io_dofile("RingHud/scripts/mods/RingHud/systems/settings_manager")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/settings_manager")
 
-mod.colors              = mod.colors or mod:io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+mod.colors              = mod.colors or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
 
-local ProximitySystem   = mod:io_dofile("RingHud/scripts/mods/RingHud/context/proximity_context")
-local VanillaHudManager = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/vanilla_hud_manager")
-local ReassuranceSystem = mod:io_dofile("RingHud/scripts/mods/RingHud/context/reassurance_context")
-local ScannerContext    = mod:io_dofile("RingHud/scripts/mods/RingHud/context/scanner_context")
+local ProximitySystem   = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/proximity_context")
+local VanillaHudManager = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/vanilla_hud_manager")
+local ReassuranceSystem = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/reassurance_context")
+local ScannerContext    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/scanner_context")
 
-mod:io_dofile("RingHud/scripts/mods/RingHud/features/grenades_feature")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/grenades_feature")
 
-mod:io_dofile("RingHud/scripts/mods/RingHud/context/ammo_visibility")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/ammo_visibility")
 
-mod:io_dofile("RingHud/scripts/mods/RingHud/context/pocketables_visibility")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/pocketables_visibility")
 
-local CrosshairFeature = mod:io_dofile("RingHud/scripts/mods/RingHud/features/crosshair_feature")
+local CrosshairFeature = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/crosshair_feature")
 if CrosshairFeature and CrosshairFeature.init then CrosshairFeature.init() end
 
-mod.floating_manager = mod:io_dofile("RingHud/scripts/mods/RingHud/core/HudElementRingHud_team_nameplate")
+mod.floating_manager = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/core/HudElementRingHud_team_nameplate")
 
-mod:io_dofile("RingHud/scripts/mods/RingHud/systems/player_assistance_suppress")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/player_assistance_suppress")
 
-local RSBridge = mod:io_dofile("RingHud/scripts/mods/RingHud/compat/recolor_stimms_bridge")
+local RSBridge = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/compat/recolor_stimms_bridge")
 
-mod:io_dofile("RingHud/scripts/mods/RingHud/systems/sound_manager")
-mod:io_dofile("RingHud/scripts/mods/RingHud/systems/buff_handler")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/sound_manager")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/buff_handler")
 
-mod:io_dofile("RingHud/scripts/mods/RingHud/features/ability_sound_feature")
-mod:io_dofile("RingHud/scripts/mods/RingHud/features/talent_feature")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/ability_sound_feature")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/talent_feature")
 
 do
-    local C = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+    local C = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
     if C and type(C) == "table" and type(C.recompute_edge_marker_size) == "function" then
         mod.recompute_edge_marker_size = C.recompute_edge_marker_size
     end
@@ -224,11 +236,15 @@ end
 
 local function add_or_replace_ring_hud_elements(element_pool)
     _insert_or_replace_element(element_pool, custom_hud_element_data)
-    _insert_or_replace_element(element_pool, custom_team_hud_element_data)
+    if not (mod._settings and mod._settings.team_hud_mode == "team_hud_off") then
+        _insert_or_replace_element(element_pool, custom_team_hud_element_data)
+    end
 end
 
 local function add_or_replace_team_only(element_pool)
-    _insert_or_replace_element(element_pool, custom_team_hud_element_data)
+    if not (mod._settings and mod._settings.team_hud_mode == "team_hud_off") then
+        _insert_or_replace_element(element_pool, custom_team_hud_element_data)
+    end
 end
 
 mod:hook_require("scripts/ui/hud/hud_elements_player_onboarding", add_or_replace_ring_hud_elements)
@@ -242,6 +258,11 @@ mod:hook_require("scripts/ui/hud/hud_elements_spectator", add_or_replace_team_on
 
 mod:hook(CLASS.HudElementTeamPlayerPanel, "draw", function(func, self, ...)
     local mode = _team_mode()
+
+    if mode == "team_hud_off" then
+        return func(self, ...)
+    end
+
     if mode ~= "team_hud_disabled"
         and mode ~= "team_hud_floating_vanilla"
         and mode ~= "team_hud_floating_thin"
@@ -274,7 +295,7 @@ end
 mod:hook_safe(CLASS.HudElementWorldMarkers, "init", function(self_hewm, parent, draw_layer, start_scale)
     mod._hewm_world_markers = self_hewm
 
-    local teammate_tpl = mod:io_dofile("RingHud/scripts/mods/RingHud/team/floating_marker_template")
+    local teammate_tpl = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/floating_marker_template")
     if teammate_tpl and teammate_tpl.name and self_hewm._marker_templates then
         self_hewm._marker_templates[teammate_tpl.name] = teammate_tpl -- "ringhud_teammate_tile"
     end
@@ -353,6 +374,7 @@ mod.update = function(dt)
 
     if ProximitySystem and ProximitySystem.update then ProximitySystem.update(dt) end
     if mod.floating_manager and mod.floating_manager.update then mod.floating_manager.update(dt) end
+    if VanillaHudManager and VanillaHudManager.periodic_recheck then VanillaHudManager.periodic_recheck(t) end
 
     if t >= (mod.next_team_stats_poll_time or 0) then
         local total_health, health_count, total_ammo, ammo_count = 0, 0, 0, 0

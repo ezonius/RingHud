@@ -2,8 +2,8 @@
 local mod = get_mod("RingHud"); if not mod then return end
 
 -- Centralised colours (single source of truth)
-local Colors       = mod.colors or mod:io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
-local U            = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local Colors       = mod.colors or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+local U            = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
 
 -- Expose on mod.* for cross-file access
 mod.team_toughness = mod.team_toughness or {}

@@ -3,8 +3,8 @@ local mod = get_mod("RingHud")
 if not mod then return {} end
 
 local UIWidget           = require("scripts/managers/ui/ui_widget")
-local Notch              = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
-local U                  = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local Notch              = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local U                  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
 
 local StaminaFeature     = {}
 
@@ -79,6 +79,8 @@ function StaminaFeature.update(hud_element, widget, hud_state, hotkey_override)
         edge_mv.amount = 0; changed = true
     end
     changed = U.mv_set_arc(edge_mv, r.edge.top, r.edge.bottom, changed)
+
+
     changed = U.set_style_visible(edge_style, r.edge.show, changed)
 
     if changed then widget.dirty = true end

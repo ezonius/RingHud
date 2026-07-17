@@ -2,7 +2,7 @@
 local mod = get_mod("RingHud")
 if not mod then return {} end
 
-local U                     = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local U                     = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
 local Ammo                  = require("scripts/utilities/ammo")
 local NetworkConstants      = require("scripts/network_lookup/network_constants")
 
@@ -261,6 +261,9 @@ function AmmoClipFeature.update_bar(hud_element, widget, hud_state, hotkey_overr
 
     if unfilled_style then
         changed = U.set_style_visible(unfilled_style, overall_visible, changed)
+        if overall_visible and unfilled_style.material_values then
+            local mat = unfilled_style.material_values
+        end
     end
 
     if overall_visible then
@@ -291,6 +294,8 @@ function AmmoClipFeature.update_bar(hud_element, widget, hud_state, hotkey_overr
                 local arc_top = mod.AMMO_CLIP_ARC_MIN + arc_len
                 local mat     = single_style.material_values
                 changed       = U.mv_set_arc(mat, arc_top, mod.AMMO_CLIP_ARC_MIN, changed)
+
+
                 changed       = U.mv_set_outline(mat, border_color, changed)
             end
             for i = 1, MAX_LOW_COUNT_DISPLAY do
@@ -319,6 +324,8 @@ function AmmoClipFeature.update_bar(hud_element, widget, hud_state, hotkey_overr
                         elseif num_draw_seg == 1 and i == 1 then
                             changed = U.mv_set_arc(mat, mod.AMMO_CLIP_ARC_MIN, mod.AMMO_CLIP_ARC_MIN, changed)
                         end
+
+
                         changed = U.mv_set_outline(mat, border_color, changed)
                     end
                 end

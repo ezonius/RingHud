@@ -7,13 +7,13 @@ if mod.team_throwables then
 end
 
 -- Ensure visibility helpers are loaded (force-show, interlude, etc.)
-mod:io_dofile("RingHud/scripts/mods/RingHud/team/visibility")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/visibility")
 local V                       = mod.team_visibility
 
 local TH                      = {}
 
 -- Central palette (with safe fallbacks so we never crash if palette isn't initialized yet)
-mod.colors                    = mod.colors or mod:io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+mod.colors                    = mod.colors or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
 local Colors                  = mod.colors
 local PALETTE                 = mod.PALETTE_ARGB255 or (Colors and Colors.PALETTE_ARGB255) or {}
 

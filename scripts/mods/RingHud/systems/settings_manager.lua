@@ -85,6 +85,8 @@ mod._settings = {
     dodge_color_empty              = mod:get("dodge_color_empty"),
     dodge_flash_enabled            = mod:get("dodge_flash_enabled"),
     dodge_flash_color              = mod:get("dodge_flash_color"),
+
+    throttling_interval            = mod:get("throttling_interval"),
 }
 
 -- Centralized settings change handler (the only one in the mod)

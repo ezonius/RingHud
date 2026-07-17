@@ -15,13 +15,13 @@ mod._edge_stack_frame_id       = mod._edge_stack_frame_id or 0
 ----------------------------------------------------------------
 -- Imports (sizes / settings constants)
 ----------------------------------------------------------------
-local C                        = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+local C                        = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
 
 -- Central teammate-name helper (vanilla name + slot-tinted markup)
-local Name                     = mod.team_names or mod:io_dofile("RingHud/scripts/mods/RingHud/team/team_names")
+local Name                     = mod.team_names or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_names")
 
 -- Visibility helpers (kept for other uses)
-mod.team_visibility            = mod.team_visibility or mod:io_dofile("RingHud/scripts/mods/RingHud/team/visibility")
+mod.team_visibility            = mod.team_visibility or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/visibility")
 local V                        = mod.team_visibility
 
 -- Ensure a central, scale-aware step is available for the template (optional override via settings)
@@ -167,7 +167,7 @@ local function _ensure_ringhud_template(hewm)
     if not hewm or not hewm._marker_templates then return end
     local mt = hewm._marker_templates
     if not mt.ringhud_teammate_tile then
-        local tpl = mod:io_dofile("RingHud/scripts/mods/RingHud/team/floating_marker_template")
+        local tpl = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/floating_marker_template")
         if tpl and tpl.name == "ringhud_teammate_tile" then
             _sanitize_fade_settings_on_tpl(tpl)
             mt[tpl.name] = tpl
@@ -229,125 +229,115 @@ end
 -- Marker name refresh (low-frequency)
 -- Now runs in ANY floating-related mode
 ----------------------------------------------------------------
-local function _refresh_ringhud_marker_names(self_hewm)
+local function _refresh_ringhud_teammate_tiles(self_hewm, dt, t)
     if not _mode_is_floating() then return end
     if not self_hewm or not self_hewm._markers_by_type then return end
 
     local list = self_hewm._markers_by_type.ringhud_teammate_tile
     if not list or type(list) ~= "table" then return end
 
-    local now = (Managers.time and Managers.time:time("ui")) or (Managers.time and Managers.time:time("gameplay")) or
-        os.clock()
+    local now = t or (Managers.time and Managers.time:time("ui")) or (Managers.time and Managers.time:time("gameplay")) or os.clock()
     local interval = _name_refresh_interval()
-
-    local function _each(tbl, fn)
-        if #tbl > 0 then
-            for i = 1, #tbl do fn(tbl[i]) end
-        else
-            for _, v in pairs(tbl) do fn(v) end
-        end
-    end
-
-    _each(list, function(marker)
-        if not marker or not marker.data then return end
-        local data   = marker.data
-        local player = rawget(data, "player")
-        if not player then return end
-
-        local next_at = rawget(marker, "_rh_name_next_refresh_at") or 0
-        if now < next_at then
-            -- Safety: ensure header_text exists even before first refresh
-            local w  = marker.widget
-            local wc = w and w.content
-            if wc and wc.header_text == nil then
-                wc.header_text = ""
-            end
-            return
-        end
-
-        -- Compose teammate name (slot-coloured markup string)
-        local text = _compose_name_for_marker_data(player)
-
-        if text and text ~= "" then
-            -- Update RingHud seed (for our own logic)
-            data.rh_name_composed = text
-            data.header_text      = text
-
-            -- Only SEED widget.header_text if it's empty; never overwrite non-empty
-            local w               = marker.widget
-            local wc              = w and w.content
-            if wc and (wc.header_text == nil or wc.header_text == "") then
-                wc.header_text = text
-            end
-        else
-            -- Ensure a string exists; avoid nil for external consumers
-            local w  = marker.widget
-            local wc = w and w.content
-            if wc and wc.header_text == nil then
-                wc.header_text = ""
-            end
-        end
-
-        marker._rh_name_next_refresh_at = now + interval
-    end)
-end
-
--- Propagate settings to the name text field.
--- If names are disabled via setting (e.g. name0), force the text blank.
--- Otherwise, leave it alone so the RingHud state/apply logic can set the clean name.
-local function _propagate_header_to_name_text(self_hewm)
-    if not self_hewm or not self_hewm._markers_by_type then return end
-    local list = self_hewm._markers_by_type.ringhud_teammate_tile
-    if not list or type(list) ~= "table" then return end
-
     local names_enabled = _floating_name_setting_enabled()
 
-    local function each(tbl, fn)
-        if #tbl > 0 then for i = 1, #tbl do fn(tbl[i]) end else for _, v in pairs(tbl) do fn(v) end end
-    end
+    local list_size = #list
+    if list_size > 0 then
+        for i = 1, list_size do
+            local marker = list[i]
+            if marker then
+                local data = marker.data
+                local widget = marker.widget
+                local content = widget and widget.content
+                local style = widget and widget.style
 
-    each(list, function(marker)
-        local w  = marker and marker.widget
-        local wc = w and w.content
-        if not wc then return end
+                if data and content then
+                    -- 1. Name Refresh (low-frequency)
+                    local player = rawget(data, "player")
+                    if player then
+                        local next_at = rawget(marker, "_rh_name_next_refresh_at") or 0
+                        if now >= next_at then
+                            local text = _compose_name_for_marker_data(player)
+                            if text and text ~= "" then
+                                data.rh_name_composed = text
+                                data.header_text = text
+                                if content.header_text == nil or content.header_text == "" then
+                                    content.header_text = text
+                                end
+                            elseif content.header_text == nil then
+                                content.header_text = ""
+                            end
+                            marker._rh_name_next_refresh_at = now + interval
+                        elseif content.header_text == nil then
+                            content.header_text = ""
+                        end
+                    end
 
-        if not names_enabled then
-            -- Setting disables floating names: force the rendered name text to blank.
-            if wc.name_text_value ~= "" then
-                wc.name_text_value = ""
-                if w then w.dirty = true end
+                    -- 2. Propagate Header to Name Text
+                    if not names_enabled then
+                        if content.name_text_value ~= "" then
+                            content.name_text_value = ""
+                            widget.dirty = true
+                        end
+                    end
+                end
+
+                -- 3. Apply Visibility (Throttled via frame skip)
+                if style and (mod._edge_stack_frame_id % (mod._settings.throttling_interval or 1) == 0) then
+                    local pass_style = style.name_text or style.name_text_style
+                    if pass_style and pass_style.visible == false then
+                        pass_style.visible = true
+                        widget.dirty = true
+                    end
+                end
             end
-            return
         end
+    else
+        for _, marker in pairs(list) do
+            if marker then
+                local data = marker.data
+                local widget = marker.widget
+                local content = widget and widget.content
+                local style = widget and widget.style
 
-        -- Do NOT overwrite name_text_value with header_text.
-        -- header_text is used by other mods (e.g. True Level) to inject data we don't want on floating tiles.
-        -- RingHud's Apply system handles setting name_text_value correctly.
-    end)
-end
+                if data and content then
+                    local player = rawget(data, "player")
+                    if player then
+                        local next_at = rawget(marker, "_rh_name_next_refresh_at") or 0
+                        if now >= next_at then
+                            local text = _compose_name_for_marker_data(player)
+                            if text and text ~= "" then
+                                data.rh_name_composed = text
+                                data.header_text = text
+                                if content.header_text == nil or content.header_text == "" then
+                                    content.header_text = text
+                                end
+                            elseif content.header_text == nil then
+                                content.header_text = ""
+                            end
+                            marker._rh_name_next_refresh_at = now + interval
+                        elseif content.header_text == nil then
+                            content.header_text = ""
+                        end
+                    end
 
--- Ensure the name-text pass stays visible; we rely on the text being blank
--- (from _propagate_header_to_name_text) when the setting disables names.
-local function _apply_floating_name_visibility(self_hewm)
-    if not self_hewm or not self_hewm._markers_by_type then return end
-    local list = self_hewm._markers_by_type.ringhud_teammate_tile
-    if not list or type(list) ~= "table" then return end
+                    if not names_enabled then
+                        if content.name_text_value ~= "" then
+                            content.name_text_value = ""
+                            widget.dirty = true
+                        end
+                    end
+                end
 
-    local function each(tbl, fn)
-        if #tbl > 0 then for i = 1, #tbl do fn(tbl[i]) end else for _, v in pairs(tbl) do fn(v) end end
+                if style and (mod._edge_stack_frame_id % (mod._settings.throttling_interval or 1) == 0) then
+                    local pass_style = style.name_text or style.name_text_style
+                    if pass_style and pass_style.visible == false then
+                        pass_style.visible = true
+                        widget.dirty = true
+                    end
+                end
+            end
+        end
     end
-
-    each(list, function(marker)
-        local widget = marker and marker.widget
-        local style  = widget and widget.style
-        if not style then return end
-
-        local pass_style = style.name_text or style.name_text_style
-        if pass_style and pass_style.visible == false then
-            pass_style.visible = true
-            widget.dirty = true
-        end
-    end)
 end
 
 ----------------------------------------------------------------
@@ -418,15 +408,27 @@ function mod.floating_manager.install()
         mod._floating_hijack_hooked = true
     end
 
+    local _math_ease_out_quad = math.ease_out_quad
+    local _Managers_event_trigger = Managers.event.trigger
+    local _type = type
+    local _pairs = pairs
+    local _rawget = rawget
+
     local function prepass_merge_safety(self_hewm)
+        -- Throttled: only run every N frames
+        local interval = (mod._settings.throttling_interval or 1) * 3
+        if (mod._edge_stack_frame_id % interval ~= 0) then
+            return
+        end
+
         _ensure_vanilla_nameplate_buckets(self_hewm)
 
-        local DEFAULT_EASING = (math and math.ease_out_quad) or function(x) return x end
+        local DEFAULT_EASING = _math_ease_out_quad or function(x) return x end
         local tmpls = self_hewm._marker_templates
         if tmpls then
-            for _, tpl in pairs(tmpls) do
+            for _, tpl in _pairs(tmpls) do
                 local fs = tpl and tpl.fade_settings
-                if fs and fs.easing_function == nil then
+                if fs and _rawget(fs, "easing_function") == nil then
                     fs.easing_function = DEFAULT_EASING
                 end
             end
@@ -434,24 +436,24 @@ function mod.floating_manager.install()
 
         local templates = self_hewm._marker_templates or {}
         local by_type   = self_hewm._markers_by_type or {}
-        for marker_type, list in pairs(by_type) do
-            if type(marker_type) == "string" and marker_type:sub(1, 8) == "ringhud_" then
-                if not templates[marker_type] and type(list) == "table" and next(list) ~= nil then
+        for marker_type, list in _pairs(by_type) do
+            if _type(marker_type) == "string" and marker_type:sub(1, 8) == "ringhud_" then
+                if not templates[marker_type] and _type(list) == "table" and next(list) ~= nil then
                     if #list > 0 then
                         for i = #list, 1, -1 do
                             local m = list[i]
                             if m and m.unit then
-                                Managers.event:trigger("remove_world_marker_by_unit", marker_type, m.unit)
+                                _Managers_event_trigger(Managers.event, "remove_world_marker_by_unit", marker_type, m.unit)
                             end
                             list[i] = nil
                         end
                     else
-                        for _, m in pairs(list) do
+                        for _, m in _pairs(list) do
                             if m and m.unit then
-                                Managers.event:trigger("remove_world_marker_by_unit", marker_type, m.unit)
+                                _Managers_event_trigger(Managers.event, "remove_world_marker_by_unit", marker_type, m.unit)
                             end
                         end
-                        for k in pairs(list) do
+                        for k in _pairs(list) do
                             list[k] = nil
                         end
                     end
@@ -461,21 +463,23 @@ function mod.floating_manager.install()
     end
 
     if CLASS and CLASS.HudElementWorldMarkers and not mod._hewm_update_hooked then
+        if (mod._settings and mod._settings.team_hud_mode == "team_hud_off") then
+            mod._hewm_update_hooked = true
+            return
+        end
+
         if CLASS.HudElementWorldMarkers.update then
             mod:hook(CLASS.HudElementWorldMarkers, "update",
                 function(func, self_hewm, dt, t, ui_renderer, render_settings, input_service, ...)
-                    prepass_merge_safety(self_hewm)
-
                     mod._edge_stack_frame_id = (mod._edge_stack_frame_id or 0) + 1
+                    prepass_merge_safety(self_hewm)
 
                     local ret = func(self_hewm, dt, t, ui_renderer, render_settings, input_service, ...)
 
                     _watch_resolution_and_refresh()
-                    _refresh_ringhud_marker_names(self_hewm)
-
-                    _propagate_header_to_name_text(self_hewm)
-
-                    _apply_floating_name_visibility(self_hewm)
+                    if mod._edge_stack_frame_id % (mod._settings.throttling_interval or 1) == 0 then
+                        _refresh_ringhud_teammate_tiles(self_hewm, dt, t)
+                    end
 
                     return ret
                 end)
@@ -483,16 +487,15 @@ function mod.floating_manager.install()
         elseif CLASS.HudElementWorldMarkers.update_function then
             mod:hook(CLASS.HudElementWorldMarkers, "update_function",
                 function(func, self_hewm, ui_renderer, dt, t, ...)
-                    prepass_merge_safety(self_hewm)
-
                     mod._edge_stack_frame_id = (mod._edge_stack_frame_id or 0) + 1
+                    prepass_merge_safety(self_hewm)
 
                     local ret = func(self_hewm, ui_renderer, dt, t, ...)
 
                     _watch_resolution_and_refresh()
-                    _refresh_ringhud_marker_names(self_hewm)
-                    _propagate_header_to_name_text(self_hewm)
-                    _apply_floating_name_visibility(self_hewm)
+                    if mod._edge_stack_frame_id % (mod._settings.throttling_interval or 1) == 0 then
+                        _refresh_ringhud_teammate_tiles(self_hewm, dt, t)
+                    end
 
                     return ret
                 end)
@@ -539,7 +542,7 @@ function mod.floating_manager.apply_settings(setting_id)
         if type(mod.recompute_edge_marker_size) == "function" then
             mod.recompute_edge_marker_size()
         else
-            local C2 = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+            local C2 = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
             if C2 and type(C2.recompute_edge_marker_size) == "function" then
                 C2.recompute_edge_marker_size()
             end

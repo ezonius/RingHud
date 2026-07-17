@@ -3,13 +3,13 @@ local mod = get_mod("RingHud")
 if not mod then return {} end
 
 -- Deps (presentation only)
-local Notch              = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local Notch              = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
 local UIWidget           = require("scripts/managers/ui/ui_widget")
-local U                  = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local U                  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
 
 -- Centralized visibility (context/toughness_hp_visibility.lua)
 local THV                = mod.toughness_hp_visibility or
-    mod:io_dofile("RingHud/scripts/mods/RingHud/context/toughness_hp_visibility")
+    mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/toughness_hp_visibility")
 
 local ToughnessHpFeature = {}
 
@@ -57,6 +57,7 @@ local function _drive_notch(base_style, base_mv, edge_style, edge_mv, seg_top, s
         if base_mv.amount ~= 0 then
             base_mv.amount = 0; changed = true
         end
+
         changed = U.mv_set_arc(base_mv, seg_top, seg_bottom, changed)
         if edge_style and edge_mv then
             changed = U.set_style_visible(edge_style, false) or changed
@@ -72,6 +73,7 @@ local function _drive_notch(base_style, base_mv, edge_style, edge_mv, seg_top, s
         if base_mv.amount ~= 1 then
             base_mv.amount = 1; changed = true
         end
+
         changed = U.mv_set_arc(base_mv, seg_top, seg_bottom, changed)
         if edge_style and edge_mv then
             changed = U.set_style_visible(edge_style, false) or changed
@@ -89,6 +91,8 @@ local function _drive_notch(base_style, base_mv, edge_style, edge_mv, seg_top, s
     if base_mv.amount ~= 1 then
         base_mv.amount = 1; changed = true
     end
+
+
     changed = U.mv_set_arc(base_mv, r.base.top, r.base.bottom, changed)
 
     -- Edge (unfilled) with outline tint
@@ -96,6 +100,7 @@ local function _drive_notch(base_style, base_mv, edge_style, edge_mv, seg_top, s
         if edge_mv.amount ~= 0 then
             edge_mv.amount = 0; changed = true
         end
+
         changed = U.mv_set_arc(edge_mv, r.edge.top, r.edge.bottom, changed)
         changed = U.mv_set_outline(edge_mv, edge_color, changed)
         changed = U.set_style_visible(edge_style, r.edge.show) or changed

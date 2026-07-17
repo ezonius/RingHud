@@ -68,7 +68,7 @@ mod._pending_medcrate_markers              = mod._pending_medcrate_markers or
 local ADD_MARKER_GRACE_S                   = 0.25
 
 -- Marker template & persistent tracking table
-local RingHudItemTrackerMarker             = mod:io_dofile("RingHud/scripts/mods/RingHud/context/RingHud_marker")
+local RingHudItemTrackerMarker             = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/RingHud_marker")
 mod._tracked_item_units                    = mod._tracked_item_units or mod:persistent_table("tracked_item_units")
 
 -- Guards for once-only wiring

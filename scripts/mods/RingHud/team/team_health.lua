@@ -5,10 +5,10 @@ if mod.team_health_presentation then
     return mod.team_health_presentation
 end
 
-local C                      = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
-local U                      = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
-local T                      = mod:io_dofile("RingHud/scripts/mods/RingHud/team/team_toughness")
-local Notch                  = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local C                      = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+local U                      = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local T                      = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_toughness")
+local Notch                  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
 
 local S                      = {}
 

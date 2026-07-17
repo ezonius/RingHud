@@ -11,17 +11,17 @@ mod.vanilla_hud_manager                = mod.vanilla_hud_manager or {}
 local VanillaHudManager                = mod.vanilla_hud_manager
 
 local Status                           = mod.team_status
-    or mod:io_dofile("RingHud/scripts/mods/RingHud/team/team_icon")
-local C                                = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+    or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_icon")
+local C                                = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
 local TeamPockets                      = mod.team_pocketables
-    or mod:io_dofile("RingHud/scripts/mods/RingHud/team/team_pocketables")
+    or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_pocketables")
 
 local Streamliner                      = mod.objective_feed_streamliner
-    or mod:io_dofile("RingHud/scripts/mods/RingHud/systems/objective_feed_streamliner")
+    or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/objective_feed_streamliner")
 
 -- Shared HUD helpers (centralised)
 local HudUtils                         = mod.utils
-    or mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+    or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
 local get_current_hud_instances        = HudUtils.get_current_hud_instances
 local resolve_element_instance         = HudUtils.resolve_element_instance
 
@@ -355,119 +355,128 @@ function VanillaHudManager.init()
             end
         )
 
-        mod:hook(CLASS.HudElementTeamPlayerPanel, "update",
-            function(func, self, ...)
-                local ret = func(self, ...)
+local math_clamp = math.clamp
+local string_format = string.format
+local Unit_alive = Unit.alive
+local ScriptUnit_has_extension = ScriptUnit.has_extension
+local ScriptUnit_extension = ScriptUnit.extension
 
-                -- 1. Existing Pocketable Tinting
-                if TeamPockets and TeamPockets.apply_vanilla_tints then
-                    TeamPockets.apply_vanilla_tints(self)
+mod:hook(CLASS.HudElementTeamPlayerPanel, "update",
+    function(func, self, ...)
+        local ret = func(self, ...)
+
+        -- 1. Existing Pocketable Tinting
+        if TeamPockets and TeamPockets.apply_vanilla_tints then
+            TeamPockets.apply_vanilla_tints(self)
+        end
+
+        local s = mod._settings
+        if not s then return ret end
+
+        local widgets = self._widgets_by_name
+        local player = self._player or (self._data and self._data.player)
+
+        if s.team_hud_mode == "team_hud_floating_thin" then
+            -- 2. Ammo Logic
+            if s.team_munitions ~= "team_munitions_disabled" then
+                -- A. Disable Vanilla Icon
+                local ammo_status = widgets.ammo_status
+                if ammo_status and ammo_status.visible then
+                    ammo_status.visible = false
+                    ammo_status.dirty = true
                 end
 
-                local s = mod._settings
+                -- B. Update Custom Text
+                local ammo_text_widget = widgets.ringhud_ammo_text
+                if ammo_text_widget then
+                    local content = ammo_text_widget.content
+                    local style = ammo_text_widget.style.text
+                    local unit = player and player.player_unit
 
-                if s and s.team_hud_mode == "team_hud_floating_thin" then
-                    local widgets = self._widgets_by_name
-                    local player = self._player or (self._data and self._data.player)
+                    local text_to_show = ""
+                    local color_to_use = mod.PALETTE_ARGB255.GENERIC_WHITE
 
-                    -- 2. Ammo Logic
-                    if s.team_munitions ~= "team_munitions_disabled" then
-                        -- A. Disable Vanilla Icon
-                        if widgets.ammo_status then
-                            widgets.ammo_status.visible = false
-                            widgets.ammo_status.dirty = true
-                        end
+                    if unit and Unit_alive(unit) then
+                        local status = Status.for_unit(unit)
+                        if status ~= "dead" and status ~= "hogtied" then
+                            local unit_data = ScriptUnit_has_extension(unit, "unit_data_system") and ScriptUnit_extension(unit, "unit_data_system")
+                            if unit_data then
+                                local comp = unit_data:read_component("slot_secondary")
+                                if comp then
+                                    local cur = HudUtils.sum_ammo_field(comp.current_ammunition_reserve)
+                                    local max = HudUtils.sum_ammo_field(comp.max_ammunition_reserve)
 
-                        -- B. Update Custom Text
-                        -- TODO How much of this is duplication of team_ammo.lua or some other file?
-                        local ammo_text_widget = widgets.ringhud_ammo_text
-                        if ammo_text_widget then
-                            local content = ammo_text_widget.content
-                            local style = ammo_text_widget.style.text
-                            local unit = player and player.player_unit
+                                    if max > 0 then
+                                        local f = math_clamp(cur / max, 0, 1)
+                                        text_to_show = string_format("%.0f%%", f * 100)
 
-                            local text_to_show = ""
-                            local color_to_use = mod.PALETTE_ARGB255.GENERIC_WHITE
-
-                            if unit and Unit.alive(unit) then
-                                local status = Status.for_unit(unit)
-                                local is_disabled = (status == "dead" or status == "hogtied")
-
-                                if not is_disabled then
-                                    local unit_data = ScriptUnit.has_extension(unit, "unit_data_system") and
-                                        ScriptUnit.extension(unit, "unit_data_system")
-                                    if unit_data then
-                                        local comp = unit_data:read_component("slot_secondary")
-                                        if comp then
-                                            local cur = HudUtils.sum_ammo_field(comp.current_ammunition_reserve)
-                                            local max = HudUtils.sum_ammo_field(comp.max_ammunition_reserve)
-
-                                            if max > 0 then
-                                                local f = math.clamp(cur / max, 0, 1)
-                                                text_to_show = string.format("%.0f%%", f * 100)
-
-                                                if f >= 0.85 then
-                                                    color_to_use = mod.PALETTE_ARGB255.AMMO_TEXT_COLOR_HIGH
-                                                elseif f >= 0.65 then
-                                                    color_to_use = mod.PALETTE_ARGB255.AMMO_TEXT_COLOR_MEDIUM_H
-                                                elseif f >= 0.45 then
-                                                    color_to_use = mod.PALETTE_ARGB255.AMMO_TEXT_COLOR_MEDIUM_L
-                                                elseif f >= 0.25 then
-                                                    color_to_use = mod.PALETTE_ARGB255.AMMO_TEXT_COLOR_LOW
-                                                else
-                                                    color_to_use = mod.PALETTE_ARGB255.AMMO_TEXT_COLOR_CRITICAL
-                                                end
-                                            end
+                                        if f >= 0.85 then
+                                            color_to_use = mod.PALETTE_ARGB255.AMMO_TEXT_COLOR_HIGH
+                                        elseif f >= 0.65 then
+                                            color_to_use = mod.PALETTE_ARGB255.AMMO_TEXT_COLOR_MEDIUM_H
+                                        elseif f >= 0.45 then
+                                            color_to_use = mod.PALETTE_ARGB255.AMMO_TEXT_COLOR_MEDIUM_L
+                                        elseif f >= 0.25 then
+                                            color_to_use = mod.PALETTE_ARGB255.AMMO_TEXT_COLOR_LOW
+                                        else
+                                            color_to_use = mod.PALETTE_ARGB255.AMMO_TEXT_COLOR_CRITICAL
                                         end
                                     end
                                 end
                             end
-
-                            if content.text ~= text_to_show then
-                                content.text = text_to_show
-                                ammo_text_widget.dirty = true
-                            end
-
-                            if HudUtils.set_style_text_color(style, color_to_use) then
-                                ammo_text_widget.dirty = true
-                            end
-
-                            if style.visible ~= (text_to_show ~= "") then
-                                style.visible = (text_to_show ~= "")
-                                ammo_text_widget.dirty = true
-                            end
                         end
                     end
 
-                    -- 3. Throwable Hiding Logic
-                    local throwable_widget = widgets.throwable
-                    -- Only check if currently visible (don't force visible if vanilla hid it)
-                    if throwable_widget and throwable_widget.visible then
-                        local should_hide = false
+                    if content.text ~= text_to_show then
+                        content.text = text_to_show
+                        ammo_text_widget.dirty = true
+                    end
 
-                        -- Condition A: Psyker Archetype
-                        if player and not player.__deleted and player.archetype_name and player:archetype_name() == "psyker" then
-                            should_hide = true
-                        end
+                    if HudUtils.set_style_text_color(style, color_to_use) then
+                        ammo_text_widget.dirty = true
+                    end
 
-                        -- Condition B: Specific Icon
-                        if not should_hide then
-                            local tex = throwable_widget.content.texture
-                            if tex == "content/ui/materials/icons/throwables/hud/small/party_non_grenade" then
-                                should_hide = true
-                            end
-                        end
-
-                        if should_hide then
-                            throwable_widget.visible = false
-                            throwable_widget.dirty = true
-                        end
+                    local should_be_visible = (text_to_show ~= "")
+                    if style.visible ~= should_be_visible then
+                        style.visible = should_be_visible
+                        ammo_text_widget.dirty = true
                     end
                 end
-
-                return ret
             end
-        )
+        end
+
+        -- 3. Throwable Hiding Logic
+        local throwable_widget = widgets.throwable
+        -- Only check if currently visible (don't force visible if vanilla hid it)
+        if throwable_widget and throwable_widget.visible then
+            local should_hide = false
+
+            -- Condition A: Psyker Archetype
+            if player and not player.__deleted then
+                if player._rh_is_psyker == nil then
+                    player._rh_is_psyker = player.archetype_name and player:archetype_name() == "psyker"
+                end
+                if player._rh_is_psyker then
+                    should_hide = true
+                end
+            end
+
+            -- Condition B: Specific Icon
+            if not should_hide then
+                if throwable_widget.content.texture == "content/ui/materials/icons/throwables/hud/small/party_non_grenade" then
+                    should_hide = true
+                end
+            end
+
+            if should_hide then
+                throwable_widget.visible = false
+                throwable_widget.dirty = true
+            end
+        end
+
+        return ret
+    end
+)
     end
 
     -- Apply static visibility (weapons, overcharge, etc.) once per UIHud instance
@@ -476,6 +485,7 @@ function VanillaHudManager.init()
             if not mod._ringhud_visibility_applied_to_hud[self_ui_hud_instance] then
                 update_element_visibility()
                 mod._ringhud_visibility_applied_to_hud[self_ui_hud_instance] = true
+                mod:hook_disable(CLASS.UIHud, "update")
             end
 
             return func(self_ui_hud_instance, dt, t, input_service)
@@ -485,6 +495,54 @@ function VanillaHudManager.init()
     -- Delegate to the objective feed streamliner for minimal objective / declutter logic
     if Streamliner and Streamliner.init then
         Streamliner.init()
+    end
+
+    -- Hook HudElementPlayerWeaponHandler:set_visible to force-hide when requested
+    mod:hook_require("scripts/ui/hud/elements/player_weapon_handler/hud_element_player_weapon_handler", function(class)
+        -- Helper to apply the hook
+        local function _apply_set_visible_hook(instance)
+            if not mod._ringhud_hooked_elements[instance] then
+                mod:hook(instance, "set_visible", function(func, self, visible, ...)
+                    if mod._settings.hide_default_weapons == true then
+                        return func(self, false, ...)
+                    end
+                    return func(self, visible, ...)
+                end)
+                mod:hook(instance, "draw", function(func, self, ...)
+                    if mod._settings.hide_default_weapons == true then
+                        return
+                    end
+                    return func(self, ...)
+                end)
+                mod._ringhud_hooked_elements[instance] = true
+            end
+        end
+
+        -- 1. Hook init for future instances
+        if not mod._hooked_weapon_handler_init then
+            mod:hook(class, "init", function(func, self, ...)
+                func(self, ...)
+                _apply_set_visible_hook(self)
+            end)
+            mod._hooked_weapon_handler_init = true
+        end
+
+        -- 2. Hook existing instances immediately if they exist
+        local hud, const = get_current_hud_instances()
+        local existing_instance = resolve_element_instance(hud, const, "HudElementPlayerWeaponHandler")
+        if existing_instance then
+            _apply_set_visible_hook(existing_instance)
+        end
+    end)
+end
+
+-- Re-check visibility periodically (e.g. if the game resets visibility)
+function VanillaHudManager.periodic_recheck(t)
+    mod._rh_visibility_next_check = mod._rh_visibility_next_check or 0
+    if t > mod._rh_visibility_next_check then
+        update_element_visibility()
+        local check_interval = 5.0 * (mod._settings.throttling_interval or 1)
+        mod._rh_visibility_next_check = t + check_interval
     end
 end
 

@@ -5,12 +5,15 @@ if mod.utils then
     return mod.utils
 end
 
-local C                         = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+local C                         = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
 local FixedFrame                = require("scripts/utilities/fixed_frame")
 local UISettings                = require("scripts/settings/ui/ui_settings")
 
 mod.utils                       = {}
 local RingHudUtils              = mod.utils
+
+local WHITE_ARGB = { 255, 255, 255, 255 }
+local WHITE_RGBA = { 1, 1, 1, 1 }
 
 -- e.g. string.format(RingHudUtils.percent_num_format, 73.2) -> "73%"
 RingHudUtils.percent_num_format = "%01.f%%"
@@ -69,16 +72,27 @@ end
 -- Returns: changed (bool)
 function RingHudUtils.set_style_text_color(style, argb255, changed)
     if not style then return changed or false end
-    local did = false
 
-    local nc = RingHudUtils.argb255_or_white(argb255)
-    local tc = style.text_color
-    if not tc or not RingHudUtils.colors_equal(tc, nc) then
-        style.text_color = table.clone(nc)
-        did = true
+    local nc = argb255
+    if type(nc) ~= "table" then
+        nc = (mod.PALETTE_ARGB255 and mod.PALETTE_ARGB255.GENERIC_WHITE) or WHITE_ARGB
     end
 
-    return (changed == true) or did
+    local tc = style.text_color
+    if not tc then
+        tc = { 255, 255, 255, 255 }
+        style.text_color = tc
+    end
+
+    if tc[1] ~= nc[1] or tc[2] ~= nc[2] or tc[3] ~= nc[3] or tc[4] ~= nc[4] then
+        tc[1] = nc[1]
+        tc[2] = nc[2]
+        tc[3] = nc[3]
+        tc[4] = nc[4]
+        return true
+    end
+
+    return changed == true
 end
 
 -- Style color (ARGB255).
@@ -86,16 +100,27 @@ end
 -- Returns: changed (bool)
 function RingHudUtils.set_style_color(style, argb255, changed)
     if not style then return changed or false end
-    local did = false
 
-    local nc  = RingHudUtils.argb255_or_white(argb255)
-    local c   = style.color
-    if not c or not RingHudUtils.colors_equal(c, nc) then
-        style.color = table.clone(nc)
-        did = true
+    local nc = argb255
+    if type(nc) ~= "table" then
+        nc = (mod.PALETTE_ARGB255 and mod.PALETTE_ARGB255.GENERIC_WHITE) or WHITE_ARGB
     end
 
-    return (changed == true) or did
+    local c = style.color
+    if not c then
+        c = { 255, 255, 255, 255 }
+        style.color = c
+    end
+
+    if c[1] ~= nc[1] or c[2] ~= nc[2] or c[3] ~= nc[3] or c[4] ~= nc[4] then
+        c[1] = nc[1]
+        c[2] = nc[2]
+        c[3] = nc[3]
+        c[4] = nc[4]
+        return true
+    end
+
+    return changed == true
 end
 
 -- Toggle style.visible and alpha.
@@ -653,10 +678,17 @@ end
 -- mv.outline_color = RGBA1 (only write when changed). Returns true if changed.
 function RingHudUtils.mv_set_outline(mv, rgba, changed)
     if not mv then return changed or false end
-    local next_rgba = RingHudUtils.rgba_or_white(rgba)
+    local next_rgba = rgba or WHITE_RGBA
     local curr = mv.outline_color
-    if not curr or not RingHudUtils.colors_equal(curr, next_rgba) then
-        mv.outline_color = table.clone(next_rgba)
+    if not curr then
+        curr = { 1, 1, 1, 1 }
+        mv.outline_color = curr
+    end
+    if curr[1] ~= next_rgba[1] or curr[2] ~= next_rgba[2] or curr[3] ~= next_rgba[3] or curr[4] ~= next_rgba[4] then
+        curr[1] = next_rgba[1]
+        curr[2] = next_rgba[2]
+        curr[3] = next_rgba[3]
+        curr[4] = next_rgba[4]
         return true
     end
     return changed or false
@@ -665,10 +697,17 @@ end
 -- mv.fillcolor = RGBA1 (only write when changed). Returns true if changed.
 function RingHudUtils.mv_set_fill(mv, rgba, changed)
     if not mv then return changed or false end
-    local next_rgba = RingHudUtils.rgba_or_white(rgba)
+    local next_rgba = rgba or WHITE_RGBA
     local curr = mv.fillcolor
-    if not curr or not RingHudUtils.colors_equal(curr, next_rgba) then
-        mv.fillcolor = table.clone(next_rgba)
+    if not curr then
+        curr = { 1, 1, 1, 1 }
+        mv.fillcolor = curr
+    end
+    if curr[1] ~= next_rgba[1] or curr[2] ~= next_rgba[2] or curr[3] ~= next_rgba[3] or curr[4] ~= next_rgba[4] then
+        curr[1] = next_rgba[1]
+        curr[2] = next_rgba[2]
+        curr[3] = next_rgba[3]
+        curr[4] = next_rgba[4]
         return true
     end
     return changed or false
@@ -677,13 +716,21 @@ end
 -- mv.arc_top_bottom = {top, bottom}. Returns true if changed.
 function RingHudUtils.mv_set_arc(mv, top, bottom, changed)
     if not mv then return changed or false end
+
     local curr = mv.arc_top_bottom
-    if not curr or curr[1] ~= top or curr[2] ~= bottom then
-        mv.arc_top_bottom = { top, bottom }
+    if not curr then
+        curr = { top, bottom }
+        mv.arc_top_bottom = curr
+        return true
+    end
+    if curr[1] ~= top or curr[2] ~= bottom then
+        curr[1] = top
+        curr[2] = bottom
         return true
     end
     return changed or false
 end
+
 
 --------------------------------------------------------------------------------
 -- Ammo helpers

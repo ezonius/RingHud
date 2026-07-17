@@ -105,48 +105,47 @@ mod:hook(CLASS.HudElementPlayerAbility, "update",
         --   • If AAR is not present → use our dropdown selection (zealot/shield/etc.).
         HudElementPlayerAbility.super.update(self, dt, t, ui_renderer, render_settings, input_service)
 
-        local player                          = self._data.player
-        local parent                          = self._parent
-        local ability_extension               = parent and parent.get_player_extension
+        local data = self._data
+        local player = data.player
+        local parent = self._parent
+        local ability_id = self._ability_id
+
+        local ability_extension = parent and parent.get_player_extension
             and parent:get_player_extension(player, "ability_system")
-        local ability_id                      = self._ability_id
+
+        if not ability_extension or not ability_extension:ability_is_equipped(ability_id) then
+            return
+        end
+
+        local remaining_ability_charges = ability_extension:remaining_ability_charges(ability_id)
+        local max_ability_charges = ability_extension:max_ability_charges(ability_id)
+        local remaining_ability_cooldown = ability_extension:remaining_ability_cooldown(ability_id)
+        local max_ability_cooldown = ability_extension:max_ability_cooldown(ability_id)
+        local is_paused = ability_extension:is_cooldown_paused(ability_id)
+
+        local uses_charges = max_ability_charges and max_ability_charges > 1
+        local has_charges_left = (remaining_ability_charges or 0) > 0
 
         local cooldown_progress
-        local remaining_ability_charges
-        local has_charges_left                = true
-        local uses_charges                    = false
-        local in_process_of_going_on_cooldown = false -- kept for parity
-        local force_on_cooldown               = false -- kept for parity
+        if is_paused then
+            cooldown_progress = 0
+        elseif max_ability_cooldown and max_ability_cooldown > 0 then
+            -- Use local math.lerp if available, otherwise just calculate
+            local lerp = math.lerp or function(a, b, t) return a + (b - a) * t end
+            cooldown_progress = 1 - lerp(0, 1, remaining_ability_cooldown / max_ability_cooldown)
 
-        if ability_extension and ability_extension:ability_is_equipped(ability_id) then
-            local remaining_ability_cooldown = ability_extension:remaining_ability_cooldown(ability_id)
-            local max_ability_cooldown       = ability_extension:max_ability_cooldown(ability_id)
-            local is_paused                  = ability_extension:is_cooldown_paused(ability_id)
-
-            remaining_ability_charges        = ability_extension:remaining_ability_charges(ability_id)
-            local max_ability_charges        = ability_extension:max_ability_charges(ability_id)
-
-            uses_charges                     = max_ability_charges and max_ability_charges > 1
-            has_charges_left                 = (remaining_ability_charges or 0) > 0
-
-            if is_paused then
-                cooldown_progress = 0
-            elseif max_ability_cooldown and max_ability_cooldown > 0 then
-                cooldown_progress = 1 - math.lerp(0, 1, remaining_ability_cooldown / max_ability_cooldown)
-
-                if cooldown_progress == 0 then
-                    cooldown_progress = 1
-                end
-            else
-                cooldown_progress = uses_charges and 1 or 0
+            if cooldown_progress == 0 then
+                cooldown_progress = 1
             end
+        else
+            cooldown_progress = uses_charges and 1 or 0
         end
 
         if cooldown_progress ~= self._ability_progress then
             self:_set_progress(cooldown_progress)
         end
 
-        local on_cooldown = cooldown_progress ~= 1 and not in_process_of_going_on_cooldown or force_on_cooldown
+        local on_cooldown = cooldown_progress ~= 1
 
         if on_cooldown ~= self._on_cooldown
             or uses_charges ~= self._uses_charges

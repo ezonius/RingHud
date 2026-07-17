@@ -44,11 +44,12 @@ function Crosshair.init()
 
     -- 1) Latch vanilla crosshair deltas so HUD elements can “shake” with it.
     if CrosshairUtil and CrosshairUtil.position then
+        local C_table = Crosshair
         mod:hook(CrosshairUtil, "position",
             function(func, dt, t, ui_hud, ui_renderer, current_x, current_y, pivot_position)
                 local final_x, final_y = func(dt, t, ui_hud, ui_renderer, current_x, current_y, pivot_position)
-                Crosshair._dx = final_x or 0
-                Crosshair._dy = final_y or 0
+                C_table._dx = final_x or 0
+                C_table._dy = final_y or 0
                 return final_x, final_y
             end)
     end

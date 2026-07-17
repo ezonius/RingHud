@@ -4,10 +4,10 @@ local mod = get_mod("RingHud")
 if not mod then return {} end
 
 local UIWidget                 = require("scripts/managers/ui/ui_widget")
-local RingHudUtils             = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local RingHudUtils             = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
 local U                        = RingHudUtils
 local ColorUtilities           = require("scripts/utilities/ui/colors")
-local Notch                    = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local Notch                    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
 local PlayerCharacterConstants = require("scripts/settings/player_character/player_character_constants")
 local UIFontSettings           = require("scripts/managers/ui/ui_font_settings")
 
@@ -155,6 +155,9 @@ function PerilFeature.update(hud_element, widgets, hud_state, hotkey_override)
 
     local base_mv          = base_style.material_values
     local edge_mv          = edge_style.material_values
+
+    -- Background Style enforcement
+    -- Style enforcement is now handled at widget definition level
 
     -- Base slice (filled)
     if base_mv.amount ~= 1 then

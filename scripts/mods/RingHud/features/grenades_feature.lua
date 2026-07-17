@@ -9,8 +9,8 @@ end
 mod.grenades_feature              = {}
 local GrenadesFeature             = mod.grenades_feature
 
-local Notch                       = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
-local U                           = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local Notch                       = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local U                           = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Broker flash-grenade (blitz) settings – used for kill-based charge regen progress
@@ -393,6 +393,8 @@ function GrenadesFeature.update(hud_element, widget, hud_state, hotkey_override)
                 if emv.amount ~= 0 then
                     emv.amount = 0; changed = true
                 end
+
+
                 changed = U.mv_set_outline(emv, clr_final, changed)
 
                 local base_vis = res.base.show
@@ -411,6 +413,8 @@ function GrenadesFeature.update(hud_element, widget, hud_state, hotkey_override)
                     if seg_mv.amount ~= amt_final then
                         seg_mv.amount = amt_final; changed = true
                     end
+
+
                     changed = U.mv_set_outline(seg_mv, clr_final, changed)
                     changed = U.mv_set_arc(seg_mv, arc_top, arc_bottom, changed)
                 else

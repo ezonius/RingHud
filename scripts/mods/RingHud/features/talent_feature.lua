@@ -2,8 +2,8 @@
 local mod = get_mod("RingHud"); if not mod then return {} end
 
 local UIWidget                = require("scripts/managers/ui/ui_widget")
-local U                       = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
-local Notch                   = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local U                       = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local Notch                   = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
 
 local TalentFeature           = {}
 
@@ -284,6 +284,8 @@ local function _update_adamant(widget, style, data, force_show, partial_outline_
                 if mv_base.amount ~= 0 then
                     mv_base.amount = 0; c = true
                 end
+
+
                 c = U.mv_set_arc(mv_base, top, bottom, c)
                 c = U.set_style_visible(base, true, c)
                 c = U.set_style_visible(edge, false, c)

@@ -8,14 +8,14 @@ end
 mod.team_marker_apply       = mod.team_marker_apply or {}
 local Apply                 = mod.team_marker_apply
 
-local C                     = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
-local U                     = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
-local S                     = mod:io_dofile("RingHud/scripts/mods/RingHud/team/team_health")
-local TH                    = mod:io_dofile("RingHud/scripts/mods/RingHud/team/team_grenades")
-local TXT                   = mod:io_dofile("RingHud/scripts/mods/RingHud/team/team_ability")
-local AM                    = mod:io_dofile("RingHud/scripts/mods/RingHud/team/team_ammo")
-local TT                    = mod:io_dofile("RingHud/scripts/mods/RingHud/team/team_toughness")
-local Notch                 = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local C                     = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+local U                     = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local S                     = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_health")
+local TH                    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_grenades")
+local TXT                   = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_ability")
+local AM                    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_ammo")
+local TT                    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_toughness")
+local Notch                 = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
 
 local UIHudSettings         = require("scripts/settings/ui/ui_hud_settings")
 
@@ -338,6 +338,7 @@ local function _apply_assist_or_respawn(widget, RingHud_state_team)
         local src                       = RingHud_state_team.assist.outline_rgba01 or { 1, 0, 0, 1 }
         U.mv_set_outline(base_style.material_values, src)
         U.mv_set_outline(edge_style.material_values, src)
+
 
         if RingHud_state_team.assist.respawn_digits then
             if content.status_icon ~= nil then

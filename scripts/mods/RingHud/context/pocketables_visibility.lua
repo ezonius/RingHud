@@ -33,16 +33,16 @@ mod.pocketables_visibility = mod.pocketables_visibility or {}
 local PV                   = mod.pocketables_visibility
 
 -- Context providers
-local Intensity            = mod:io_dofile("RingHud/scripts/mods/RingHud/context/intensity_context")
-mod:io_dofile("RingHud/scripts/mods/RingHud/context/proximity_context")
-mod:io_dofile("RingHud/scripts/mods/RingHud/context/wield_context")
+local Intensity            = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/intensity_context")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/proximity_context")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/wield_context")
 
 -- Team visibility wrapper (already aggregates proximity + wield latches)
-mod:io_dofile("RingHud/scripts/mods/RingHud/team/visibility")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/visibility")
 local V               = mod.team_visibility
 
 -- Optional helpers for group crates (team-side only)
-local TeamPocketables = mod:io_dofile("RingHud/scripts/mods/RingHud/team/team_pocketables")
+local TeamPocketables = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_pocketables")
 
 ----------------------------------------------------------------
 -- Local helpers

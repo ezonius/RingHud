@@ -2,7 +2,7 @@
 local mod = get_mod("RingHud"); if not mod then return end
 local InputUtils = require("scripts/managers/input/input_utils")
 local TextUtils = require("scripts/utilities/ui/text")
-local Colors = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+local Colors = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
 
 local Localize = Localize
 local localizations = {
@@ -43,6 +43,15 @@ local localizations = {
 
     minimal_objective_feed_enabled   = {
         en = "Streamline Popups",
+    },
+    performance_settings             = {
+        en = " Performance",
+    },
+    throttling_interval              = {
+        en = "Update Interval (Frames)",
+    },
+    throttling_interval_tooltip      = {
+        en = "Controls how often the HUD updates its internal logic.\n\n• Higher value = Better performance (CPU).\n\n• Lower value = Smoother animations and updates.\n\nDefault is 1 (every frame). Recommend 2-4 if you experience frame drops.",
     },
 
     layout_supergroup                = {
@@ -540,6 +549,7 @@ local localizations = {
             "• 停靠+跟隨\n",
     },
     team_hud_disabled                = { en = Localize("loc_setting_mix_preset_flat") },
+    team_hud_off                     = { en = "Off", ["zh-cn"] = "关闭", ["zh-tw"] = "關閉" },
     team_hud_docked                  = {
         en = "Docked", -- [ ] Localize (static?)
         ["zh-cn"] = "左停靠",

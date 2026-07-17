@@ -7,7 +7,7 @@ local AV            = mod.ammo_visibility
 
 -- Deps
 local V             = mod.team_visibility or
-    mod:io_dofile("RingHud/scripts/mods/RingHud/team/visibility")
+    mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/visibility")
 
 ----------------------------------------------------------------
 -- Time helper (prefer UI time, then gameplay, then os.clock)

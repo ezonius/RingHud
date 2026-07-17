@@ -3,7 +3,7 @@
 local mod = get_mod("RingHud")
 if not mod then return end
 
-mod:io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
 
 -- Helper: only include flat ARGB255 tuples (four numbers), skip compound tables like color spectrums.
 local function _is_argb255_tuple(t)
@@ -86,6 +86,20 @@ local DATA = {
                 setting_id    = "minimal_objective_feed_enabled",
                 type          = "checkbox",
                 default_value = true,
+            },
+            {
+                setting_id  = "performance_settings",
+                type        = "group",
+                sub_widgets = {
+                    {
+                        setting_id      = "throttling_interval",
+                        type            = "numeric",
+                        default_value   = 10,
+                        range           = { 1, 100 },
+                        decimals_number = 0,
+                        tooltip         = "throttling_interval_tooltip",
+                    },
+                },
             },
             ------------------------------------------------------------------
             -- Layout
@@ -544,8 +558,10 @@ local DATA = {
                                 type          = "dropdown",
                                 default_value = "team_hud_floating_thin",
                                 tooltip       = "team_hud_mode_tooltip",
+                                require_restart = true,
                                 options       = {
                                     { text = "team_hud_disabled",         value = "team_hud_disabled" },
+                                    { text = "team_hud_off",              value = "team_hud_off" },
                                     { text = "team_hud_docked",           value = "team_hud_docked" },
                                     { text = "team_hud_floating",         value = "team_hud_floating" },
                                     { text = "team_hud_floating_docked",  value = "team_hud_floating_docked" },

@@ -8,7 +8,7 @@ local Pickups               = require("scripts/settings/pickup/pickups")
 local UISettings            = require("scripts/settings/ui/ui_settings")
 local Color                 = require("scripts/utilities/ui/colors")
 local Ammo                  = require("scripts/utilities/ammo")
-local U                     = mod.utils or mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local U                     = mod.utils or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
 
 -- Localization keys for interactions that should trigger HUD "nudges".
 -- Pre-hashed into sets for O(1) lookup performance.

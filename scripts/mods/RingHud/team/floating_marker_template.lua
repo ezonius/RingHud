@@ -1,14 +1,14 @@
 -- File: RingHud/scripts/mods/RingHud/team/floating_marker_template.lua
 local mod = get_mod("RingHud"); if not mod then return end
 
-local C                           = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
-local WM                          = mod:io_dofile("RingHud/scripts/mods/RingHud/core/RingHud_definitions_team_nameplate")
+local C                           = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+local WM                          = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/core/RingHud_definitions_team_nameplate")
 
 -- View-model + appliers (move the art, not the container)
-local RingHud_state_team          = mod:io_dofile("RingHud/scripts/mods/RingHud/core/RingHud_state_team")
-local Apply                       = mod:io_dofile("RingHud/scripts/mods/RingHud/team/markers/apply")
+local RingHud_state_team          = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/core/RingHud_state_team")
+local Apply                       = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/markers/apply")
 
-local Edge                        = (mod.team_edge_stack or mod:io_dofile("RingHud/scripts/mods/RingHud/systems/edge_stack"))
+local Edge                        = (mod.team_edge_stack or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/edge_stack"))
 mod.team_edge_stack               = Edge -- ensure it's published under mod.*
 
 local UIResolution                = require("scripts/managers/ui/ui_resolution")

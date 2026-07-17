@@ -3,8 +3,8 @@ local mod = get_mod("RingHud")
 if not mod then return {} end
 
 local UIWidget                     = require("scripts/managers/ui/ui_widget")
-local Notch                        = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
-local U                            = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local Notch                        = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local U                            = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
 
 local ChargeFeature                = {}
 
@@ -147,6 +147,8 @@ local function _write_segment(style, style_edge, seg_top, seg_bottom, f, visible
                 mv_base.amount = 0
                 changed = true
             end
+
+
             changed = U.mv_set_arc(mv_base, seg_top, seg_bottom, changed)
             show_base = true
 
@@ -175,6 +177,7 @@ local function _write_segment(style, style_edge, seg_top, seg_bottom, f, visible
             return changed
         end
     elseif f >= 1 - EPS then
+
         changed = U.mv_set_arc(mv_base, seg_top, seg_bottom, changed)
         if mv_base.amount ~= 1 then
             mv_base.amount = 1

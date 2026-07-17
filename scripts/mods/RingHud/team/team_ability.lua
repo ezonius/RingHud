@@ -2,8 +2,8 @@
 local mod = get_mod("RingHud"); if not mod then return end
 
 -- Minimal deps: constants (for ABILITY_CD_TEXT_COLOR) + utils (for set_style_text_color)
-local C               = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
-local U               = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local C               = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+local U               = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
 
 -- Public API (cross-file access via mod.*)
 mod.team_ability_text = mod.team_ability_text or {}

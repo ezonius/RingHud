@@ -2,11 +2,11 @@
 local mod = get_mod("RingHud")
 if not mod then return {} end
 
-local RingHudColors                   = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
-local RSBridge                        = mod:io_dofile("RingHud/scripts/mods/RingHud/compat/recolor_stimms_bridge")
-local U                               = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
-local PV                              = mod:io_dofile("RingHud/scripts/mods/RingHud/context/pocketables_visibility")
-local AbilityFeature                  = mod:io_dofile("RingHud/scripts/mods/RingHud/features/ability_feature")
+local RingHudColors                   = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+local RSBridge                        = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/compat/recolor_stimms_bridge")
+local U                               = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local PV                              = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/pocketables_visibility")
+local AbilityFeature                  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/ability_feature")
 
 local PocketableFeature               = {}
 

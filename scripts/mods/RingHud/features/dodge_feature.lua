@@ -4,7 +4,7 @@ if not mod then return {} end
 
 local UIWidget                 = require("scripts/managers/ui/ui_widget")
 local PlayerCharacterConstants = require("scripts/settings/player_character/player_character_constants")
-local U                        = mod:io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local U                        = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
 
 local DodgeFeature             = {}
 
@@ -191,6 +191,7 @@ function DodgeFeature.update(widget, hud_state, hotkey_override, t)
                     mat.amount = seg_amount
                     changed = true
                 end
+
 
                 changed = U.mv_set_outline(mat, current_outline_color, changed)
                 changed = U.mv_set_fill(mat, current_fill_color, changed)

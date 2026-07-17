@@ -6,7 +6,7 @@ mod.toughness_hp_visibility = mod.toughness_hp_visibility or {}
 local THV                   = mod.toughness_hp_visibility
 
 -- Deps
-local Intensity             = mod:io_dofile("RingHud/scripts/mods/RingHud/context/intensity_context")
+local Intensity             = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/intensity_context")
 
 ----------------------------------------------------------------
 -- Time helper (prefer UI time, then gameplay, then os.clock)
