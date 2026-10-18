@@ -3,15 +3,15 @@ local mod = get_mod("RingHud"); if not mod then return end
 
 local UIWidget                      = require("scripts/managers/ui/ui_widget")
 
-local W                             = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/core/RingHud_definitions_team_docked")
+local W                             = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/core/RingHud_definitions_team_docked")
 
-local U                             = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
-local C                             = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+local U                             = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
+local C                             = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
 
-local RingHud_state_team            = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/core/RingHud_state_team")
-local Apply                         = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/markers/apply")
+local RingHud_state_team            = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/core/RingHud_state_team")
+local Apply                         = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/markers/apply")
 
-local Name                          = mod.team_names or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_names")
+local Name                          = mod.team_names or _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_names")
 
 local Definitions                   = W.build_definitions()
 local HudElementRingHud_team_docked = class("HudElementRingHud_team_docked", "HudElementBase")
@@ -110,8 +110,8 @@ function HudElementRingHud_team_docked:update(dt, t, ui_renderer, render_setting
     if mod._teamhud_needs_rebuild then
         mod._teamhud_needs_rebuild = false
 
-        C = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
-        W = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/core/RingHud_definitions_team_docked")
+        C = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
+        W = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/core/RingHud_definitions_team_docked")
 
         Definitions = W.build_definitions()
         HudElementRingHud_team_docked.super.init(self, self._parent, self._draw_layer, self._scale, Definitions)

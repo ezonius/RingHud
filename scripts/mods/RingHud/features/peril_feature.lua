@@ -4,10 +4,10 @@ local mod = get_mod("RingHud")
 if not mod then return {} end
 
 local UIWidget                 = require("scripts/managers/ui/ui_widget")
-local RingHudUtils             = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local RingHudUtils             = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 local U                        = RingHudUtils
 local ColorUtilities           = require("scripts/utilities/ui/colors")
-local Notch                    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local Notch                    = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/notch_split")
 local PlayerCharacterConstants = require("scripts/settings/player_character/player_character_constants")
 local UIFontSettings           = require("scripts/managers/ui/ui_font_settings")
 

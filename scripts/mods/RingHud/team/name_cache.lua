@@ -2,8 +2,8 @@
 local mod = get_mod("RingHud"); if not mod then return {} end
 
 -- Unified composer (WRU → TL parity, RingHud fallback)
-local Name = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_names")
-local U    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local Name = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_names")
+local U    = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 
 ----------------------------------------------------------------
 -- Time helper (UI time preferred, then gameplay, then os.clock)

@@ -2,7 +2,7 @@
 local mod = get_mod("RingHud")
 if not mod then return {} end
 
-local U                     = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local U                     = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 local Ammo                  = require("scripts/utilities/ammo")
 local NetworkConstants      = require("scripts/network_lookup/network_constants")
 

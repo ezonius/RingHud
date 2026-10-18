@@ -3,10 +3,10 @@
 local mod = get_mod("RingHud")
 if not mod then return {} end
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/buff_handler")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/buff_handler")
 
-local Intensity           = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/intensity_context")
+local Intensity           = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/intensity_context")
 local RingHudState        = {}
 
 local math_clamp          = math.clamp

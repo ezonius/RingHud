@@ -15,8 +15,8 @@ local mod = get_mod("RingHud"); if not mod then return {} end
 local UIWidget       = require("scripts/managers/ui/ui_widget")
 local UIFontSettings = require("scripts/managers/ui/ui_font_settings")
 
-local C              = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
-local U              = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local C              = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
+local U              = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 
 --========================
 -- Small helpers / guards

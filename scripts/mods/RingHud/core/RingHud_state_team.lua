@@ -5,21 +5,21 @@ local mod = get_mod("RingHud"); if not mod then return {} end
 mod.team_marker_state    = mod.team_marker_state or {}
 local RingHud_state_team = mod.team_marker_state
 
-local C                  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
-local T                  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_toughness")
-local P                  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_pocketables")
-local Status             = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_icon")
-local Name               = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_names")
-local NameCache          = mod.name_cache or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/name_cache")
-local U                  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local C                  = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
+local T                  = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_toughness")
+local P                  = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_pocketables")
+local Status             = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_icon")
+local Name               = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_names")
+local NameCache          = mod.name_cache or _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/name_cache")
+local U                  = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/visibility")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/visibility")
 local V             = mod.team_visibility
 
 local THV           = mod.toughness_hp_visibility or
-    mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/toughness_hp_visibility")
+    _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/toughness_hp_visibility")
 
-local PV            = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/pocketables_visibility")
+local PV            = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/pocketables_visibility")
 
 local UIHudSettings = require("scripts/settings/ui/ui_hud_settings")
 local UISettings    = require("scripts/settings/ui/ui_settings")
@@ -27,7 +27,7 @@ local Ammo          = require("scripts/utilities/ammo")
 
 local Assist        = rawget(mod, "_assist_module")
 if Assist == nil then
-    local mod_or_err = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_assist")
+    local mod_or_err = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_assist")
     Assist = (mod_or_err and mod_or_err) or false
     mod._assist_module = Assist
 end

@@ -7,7 +7,7 @@ if mod.constants then
 end
 
 -- Centralised colours (RingHud_colors.lua)
-local Colors                   = mod.colors or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+local Colors                   = mod.colors or _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/RingHud_colors")
 local PlayerCharacterConstants = require("scripts/settings/player_character/player_character_constants")
 
 local C                        = {}

@@ -9,7 +9,7 @@ end
 mod.wield_context_initialized = true
 
 -- Team/shared constants
-local C = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+local C = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
 
 -- Consistent time source (match other RingHud modules: ui -> gameplay -> os.clock)
 local function _now_ui_pref()

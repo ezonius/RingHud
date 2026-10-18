@@ -8,14 +8,14 @@ end
 mod.team_marker_apply       = mod.team_marker_apply or {}
 local Apply                 = mod.team_marker_apply
 
-local C                     = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
-local U                     = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
-local S                     = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_health")
-local TH                    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_grenades")
-local TXT                   = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_ability")
-local AM                    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_ammo")
-local TT                    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_toughness")
-local Notch                 = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local C                     = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
+local U                     = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
+local S                     = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_health")
+local TH                    = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_grenades")
+local TXT                   = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_ability")
+local AM                    = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_ammo")
+local TT                    = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_toughness")
+local Notch                 = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/notch_split")
 
 local UIHudSettings         = require("scripts/settings/ui/ui_hud_settings")
 

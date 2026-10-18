@@ -9,8 +9,8 @@ end
 mod.grenades_feature              = {}
 local GrenadesFeature             = mod.grenades_feature
 
-local Notch                       = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
-local U                           = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local Notch                       = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/notch_split")
+local U                           = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- Broker flash-grenade (blitz) settings – used for kill-based charge regen progress

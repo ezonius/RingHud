@@ -2,7 +2,7 @@
 local mod = get_mod("RingHud"); if not mod then return {} end
 
 -- Utils (for set_style_text_color, etc.)
-local U                          = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local U                          = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 
 -- Expose under mod.* for cross-file access
 mod.team_ammo_text               = mod.team_ammo_text or {}

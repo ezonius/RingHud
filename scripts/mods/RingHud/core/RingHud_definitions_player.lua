@@ -2,7 +2,7 @@
 local mod = get_mod("RingHud")
 if not mod then return {} end
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/RingHud_colors")
 
 local UIWorkspaceSettings      = require("scripts/settings/ui/ui_workspace_settings")
 local UIWidget                 = require("scripts/managers/ui/ui_widget")
@@ -232,14 +232,14 @@ local default_args = { size = size, bar_offset = BAR_OFFSET, size_thickness_outl
 
 for i = 1, #feature_bindings do
     local binding = feature_bindings[i]
-    local feature = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/" .. binding.name)
+    local feature = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/" .. binding.name)
     if feature and feature.add_widgets then
         feature.add_widgets(Definitions.widget_definitions, nil, binding.args or default_args, colors)
     end
 end
 
 -- Talent bar validation (always created)
-local TalentFeature = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/talent_feature")
+local TalentFeature = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/talent_feature")
 if TalentFeature and TalentFeature.add_widgets then
     TalentFeature.add_widgets(
         Definitions.widget_definitions,

@@ -11,17 +11,17 @@ mod.vanilla_hud_manager                = mod.vanilla_hud_manager or {}
 local VanillaHudManager                = mod.vanilla_hud_manager
 
 local Status                           = mod.team_status
-    or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_icon")
-local C                                = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+    or _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_icon")
+local C                                = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
 local TeamPockets                      = mod.team_pocketables
-    or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_pocketables")
+    or _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_pocketables")
 
 local Streamliner                      = mod.objective_feed_streamliner
-    or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/objective_feed_streamliner")
+    or _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/objective_feed_streamliner")
 
 -- Shared HUD helpers (centralised)
 local HudUtils                         = mod.utils
-    or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+    or _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 local get_current_hud_instances        = HudUtils.get_current_hud_instances
 local resolve_element_instance         = HudUtils.resolve_element_instance
 

@@ -5,10 +5,10 @@ local mod = get_mod("RingHud"); if not mod then return {} end
 mod.team_visibility = mod.team_visibility or {}
 local V             = mod.team_visibility
 
-local Intensity     = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/intensity_context")
+local Intensity     = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/intensity_context")
 -- Centralized Toughness/HP visibility logic
 local THV           = mod.toughness_hp_visibility or
-    mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/toughness_hp_visibility")
+    _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/toughness_hp_visibility")
 
 -- Internal: Team HUD globally enabled?
 local function _enabled()

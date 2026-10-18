@@ -2,9 +2,9 @@
 local mod = get_mod("RingHud")
 if not mod then return {} end
 
-local RingHudColors      = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
-local RSBridge           = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/compat/recolor_stimms_bridge")
-local C                  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+local RingHudColors      = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+local RSBridge           = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/compat/recolor_stimms_bridge")
+local C                  = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
 
 -- Expose on mod.* for cross-file use (central pocketables helpers)
 mod.team_pocketables     = mod.team_pocketables or {}

@@ -15,13 +15,13 @@ mod._edge_stack_frame_id       = mod._edge_stack_frame_id or 0
 ----------------------------------------------------------------
 -- Imports (sizes / settings constants)
 ----------------------------------------------------------------
-local C                        = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+local C                        = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
 
 -- Central teammate-name helper (vanilla name + slot-tinted markup)
-local Name                     = mod.team_names or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/team_names")
+local Name                     = mod.team_names or _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/team_names")
 
 -- Visibility helpers (kept for other uses)
-mod.team_visibility            = mod.team_visibility or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/visibility")
+mod.team_visibility            = mod.team_visibility or _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/visibility")
 local V                        = mod.team_visibility
 
 -- Ensure a central, scale-aware step is available for the template (optional override via settings)
@@ -167,7 +167,7 @@ local function _ensure_ringhud_template(hewm)
     if not hewm or not hewm._marker_templates then return end
     local mt = hewm._marker_templates
     if not mt.ringhud_teammate_tile then
-        local tpl = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/floating_marker_template")
+        local tpl = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/floating_marker_template")
         if tpl and tpl.name == "ringhud_teammate_tile" then
             _sanitize_fade_settings_on_tpl(tpl)
             mt[tpl.name] = tpl
@@ -542,7 +542,7 @@ function mod.floating_manager.apply_settings(setting_id)
         if type(mod.recompute_edge_marker_size) == "function" then
             mod.recompute_edge_marker_size()
         else
-            local C2 = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+            local C2 = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
             if C2 and type(C2.recompute_edge_marker_size) == "function" then
                 C2.recompute_edge_marker_size()
             end

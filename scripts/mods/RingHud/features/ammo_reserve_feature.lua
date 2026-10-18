@@ -1,7 +1,7 @@
 -- File: RingHud/scripts/mods/RingHud/features/ammo_reserve_feature.lua
 local mod = get_mod("RingHud"); if not mod then return {} end
 
-local RingHudUtils           = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local RingHudUtils           = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 local U                      = RingHudUtils
 local AmmoReserveFeature     = {}
 

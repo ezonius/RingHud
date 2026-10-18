@@ -1,9 +1,9 @@
 -- File: RingHud/scripts/mods/RingHud/features/ability_feature.lua
 local mod = get_mod("RingHud"); if not mod then return end
 
-local U              = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local U              = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 local UIFontSettings = require("scripts/managers/ui/ui_font_settings")
-local Colors         = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+local Colors         = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/RingHud_colors")
 
 local AbilityFeature = {}
 

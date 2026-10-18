@@ -4,27 +4,27 @@ local mod = get_mod("RingHud")
 if not mod then return end
 
 -- ## 1. DEPENDENCIES ##
-local RingHudState       = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/core/RingHud_state_player")
-local Definitions        = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/core/RingHud_definitions_player")
+local RingHudState       = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/core/RingHud_state_player")
+local Definitions        = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/core/RingHud_definitions_player")
 local PlayerUnitStatus   = require("scripts/utilities/attack/player_unit_status")
 
-local PerilFeature       = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/peril_feature")
-local DodgeFeature       = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/dodge_feature")
-local StaminaFeature     = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/stamina_feature")
-local ToughnessHpFeature = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/toughness_hp_feature")
-local GrenadesFeature    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/grenades_feature")
-local AmmoReserveFeature = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/ammo_reserve_feature")
-local AmmoClipFeature    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/ammo_clip_feature")
-local ChargeFeature      = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/charge_feature")
-local AbilityFeature     = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/ability_feature")
-local PocketableFeature  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/pocketable_feature")
+local PerilFeature       = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/peril_feature")
+local DodgeFeature       = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/dodge_feature")
+local StaminaFeature     = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/stamina_feature")
+local ToughnessHpFeature = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/toughness_hp_feature")
+local GrenadesFeature    = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/grenades_feature")
+local AmmoReserveFeature = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/ammo_reserve_feature")
+local AmmoClipFeature    = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/ammo_clip_feature")
+local ChargeFeature      = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/charge_feature")
+local AbilityFeature     = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/ability_feature")
+local PocketableFeature  = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/pocketable_feature")
 
-local TalentFeature      = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/talent_feature")
+local TalentFeature      = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/talent_feature")
 
-local Intensity          = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/intensity_context")
-local U                  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local Intensity          = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/intensity_context")
+local U                  = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/wield_context")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/wield_context")
 
 local math_abs             = math.abs
 local math_max             = math.max
@@ -113,7 +113,7 @@ HudElementRingHud_player.update        = function(self, dt, t, ui_renderer, rend
     if mod._ringhud_needs_rebuild then
         mod._ringhud_needs_rebuild = false
 
-        local new_defs = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/core/RingHud_definitions_player")
+        local new_defs = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/core/RingHud_definitions_player")
         if type(new_defs) == "table" then
             Definitions = new_defs
         end

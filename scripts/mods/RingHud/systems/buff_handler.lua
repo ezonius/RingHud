@@ -5,7 +5,7 @@ local mod = get_mod("RingHud"); if not mod then return {} end
 if mod._buff_handler_loaded then return {} end
 mod._buff_handler_loaded = true
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 
 if type(mod.get_buff_stack_count) ~= "function" then
     error("RingHud: utils.lua must define mod.get_buff_stack_count(buff_ext, buff_name_lookup).")

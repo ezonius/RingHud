@@ -3,7 +3,7 @@
 local mod = get_mod("RingHud")
 if not mod then return end
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/RingHud_colors")
 
 -- Helper: only include flat ARGB255 tuples (four numbers), skip compound tables like color spectrums.
 local function _is_argb255_tuple(t)

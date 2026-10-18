@@ -5,7 +5,7 @@ if mod.utils then
     return mod.utils
 end
 
-local C                         = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+local C                         = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
 local FixedFrame                = require("scripts/utilities/fixed_frame")
 local UISettings                = require("scripts/settings/ui/ui_settings")
 

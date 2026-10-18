@@ -5,18 +5,6 @@ local mod = get_mod("RingHud")
 if not mod then return end
 mod.version                             = "RingHud version 1.17.0"
 
----@return any? result Cached result of io_dofile
-function mod:cached_io_dofile(file_path)
-    _G.RingHud_io_dofile_cache = _G.RingHud_io_dofile_cache or {}
-    local cached = _G.RingHud_io_dofile_cache[file_path]
-    if cached ~= nil then
-        return cached
-    end
-    local result = self:io_dofile(file_path)
-    _G.RingHud_io_dofile_cache[file_path] = result
-    return result
-end
-
 local MISSION_BOARD_PACKAGE             = "packages/ui/views/mission_board_view/mission_board_view"
 
 mod._mission_board_package_load_id      = mod._mission_board_package_load_id or nil
@@ -74,38 +62,38 @@ function mod.get_local_archetype()
     return nil
 end
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/settings_manager")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/settings_manager")
 
-mod.colors              = mod.colors or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+mod.colors              = mod.colors or _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/RingHud_colors")
 
-local ProximitySystem   = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/proximity_context")
-local VanillaHudManager = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/vanilla_hud_manager")
-local ReassuranceSystem = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/reassurance_context")
-local ScannerContext    = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/scanner_context")
+local ProximitySystem   = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/proximity_context")
+local VanillaHudManager = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/vanilla_hud_manager")
+local ReassuranceSystem = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/reassurance_context")
+local ScannerContext    = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/scanner_context")
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/grenades_feature")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/grenades_feature")
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/ammo_visibility")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/ammo_visibility")
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/pocketables_visibility")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/pocketables_visibility")
 
-local CrosshairFeature = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/crosshair_feature")
+local CrosshairFeature = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/crosshair_feature")
 if CrosshairFeature and CrosshairFeature.init then CrosshairFeature.init() end
 
-mod.floating_manager = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/core/HudElementRingHud_team_nameplate")
+mod.floating_manager = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/core/HudElementRingHud_team_nameplate")
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/player_assistance_suppress")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/player_assistance_suppress")
 
-local RSBridge = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/compat/recolor_stimms_bridge")
+local RSBridge = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/compat/recolor_stimms_bridge")
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/sound_manager")
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/buff_handler")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/sound_manager")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/buff_handler")
 
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/ability_sound_feature")
-mod:cached_io_dofile("RingHud/scripts/mods/RingHud/features/talent_feature")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/ability_sound_feature")
+_G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/features/talent_feature")
 
 do
-    local C = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/constants")
+    local C = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/constants")
     if C and type(C) == "table" and type(C.recompute_edge_marker_size) == "function" then
         mod.recompute_edge_marker_size = C.recompute_edge_marker_size
     end
@@ -295,7 +283,7 @@ end
 mod:hook_safe(CLASS.HudElementWorldMarkers, "init", function(self_hewm, parent, draw_layer, start_scale)
     mod._hewm_world_markers = self_hewm
 
-    local teammate_tpl = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/team/floating_marker_template")
+    local teammate_tpl = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/team/floating_marker_template")
     if teammate_tpl and teammate_tpl.name and self_hewm._marker_templates then
         self_hewm._marker_templates[teammate_tpl.name] = teammate_tpl -- "ringhud_teammate_tile"
     end

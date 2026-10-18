@@ -9,7 +9,7 @@ local Streamliner                        = mod.objective_feed_streamliner
 
 -- Shared HUD helpers
 local U                                  = mod.utils
-    or mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+    or _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 local get_current_hud_instances          = U.get_current_hud_instances
 local resolve_element_instance           = U.resolve_element_instance
 

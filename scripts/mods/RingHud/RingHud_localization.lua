@@ -2,7 +2,7 @@
 local mod = get_mod("RingHud"); if not mod then return end
 local InputUtils = require("scripts/managers/input/input_utils")
 local TextUtils = require("scripts/utilities/ui/text")
-local Colors = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/RingHud_colors")
+local Colors = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/RingHud_colors")
 
 local Localize = Localize
 local localizations = {

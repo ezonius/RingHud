@@ -3,13 +3,13 @@ local mod = get_mod("RingHud")
 if not mod then return {} end
 
 -- Deps (presentation only)
-local Notch              = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/notch_split")
+local Notch              = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/notch_split")
 local UIWidget           = require("scripts/managers/ui/ui_widget")
-local U                  = mod:cached_io_dofile("RingHud/scripts/mods/RingHud/systems/utils")
+local U                  = _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/systems/utils")
 
 -- Centralized visibility (context/toughness_hp_visibility.lua)
 local THV                = mod.toughness_hp_visibility or
-    mod:cached_io_dofile("RingHud/scripts/mods/RingHud/context/toughness_hp_visibility")
+    _G.RingHud_cached_io_dofile(mod, "RingHud/scripts/mods/RingHud/context/toughness_hp_visibility")
 
 local ToughnessHpFeature = {}
 
